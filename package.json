@@ -1,0 +1,26 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "firebase": "^4.3.1",
+    "firebase-admin": "~5.2.1",
+    "firebase-functions": "^0.6.2",
+    "lodash": "^4.17.4"
+  },
+  "scripts": {
+    "start": "babel-node ./index.js"
+  },
+  "private": true,
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-2": "^6.24.1"
+  },
+  "babel": {
+    "presets": [
+      "env",
+      "stage-2"
+    ]
+  }
+}
