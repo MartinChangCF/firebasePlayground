@@ -118,4 +118,4 @@ typings/
 .env
 
 # firebase key
-key
+static/key
