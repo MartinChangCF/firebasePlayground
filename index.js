@@ -1,6 +1,5 @@
 import admin from 'firebase-admin'
-import serviceAccount from './static/key/lantechhub-firebase-adminsdk-bqmj9-48f8f5cb02'
-import production from './static/data/lantechProduction.json'
+import serviceAccount from './static/key/intrinotify-firebase-adminsdk-lv8a8-e8a856ddbc'
 
 // import axios from 'axios'
 import _ from 'lodash'
@@ -17,13 +16,17 @@ const config = {
   lantechhub: {
     credential: admin.credential.cert(serviceAccount),
     databaseURL: 'https://lantechhub.firebaseio.com'
+  },
+  intrinotify: {
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: 'https://intrinotify.firebaseio.com'
   }
 }
 
 init()
 
 function init () {
-  admin.initializeApp(config.lantechhub)
+  admin.initializeApp(config.intrinotify)
   const db = admin.database()
   main(db)
 }
@@ -31,8 +34,18 @@ function init () {
 async function main (db) {
   console.time('Main process')
 
-  await organizeData(db)
-  await organizeFamily(db)
+  await db.ref('services').once('value').then(async (snapshot) => {
+    const sv = snapshot.val()
+    for (let key in sv) {
+      const { time } = sv[key]
+      if (typeof time === 'string') {
+        console.log(key, typeof time, time, getTime(time))
+        await db.ref('services').child(key).update({
+          time: getTime(time)
+        })
+      }
+    }
+  })
 
   console.timeEnd('Main process')
   close(db)
@@ -43,36 +56,6 @@ function close (db) {
   process.exit()
 }
 
-// function objPrint (obj) {
-//   console.dir(obj, { depth: null })
-// }
-
-async function organizeData (db) {
-  const { attr, data } = production
-  let p = {}
-  for (let i in data) {
-    let id = data[i][0]
-    if (p[id] == null) p[id] = {}
-    for (let j in data[i]) {
-      let key = attr[j]
-      p[id][key] = data[i][j]
-    }
-    p[id] = {
-      ...p[id],
-      createdAt: admin.database.ServerValue.TIMESTAMP,
-      updatedAt: admin.database.ServerValue.TIMESTAMP
-    }
-    console.log(p)
-  }
-  await db.ref('network/product').set(p)
-}
-
-async function organizeFamily (db) {
-  const { data } = production
-  const f = {}
-  for (let i in data) {
-    f[data[i][3]] = true
-  }
-  console.log(f)
-  await db.ref('network/family').set(f)
+function getTime (t) {
+  return (new Date(t)).getTime()
 }
