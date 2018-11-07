@@ -33,13 +33,42 @@ function init () {
 async function main (db) {
   console.time('Main process')
 
-  const newUsers = [
-    { email: 'kenlee@intrising.com.tw' },
-    { email: 'khkh@intrising.com.tw' },
-    { email: 'brianlian@intrising.com.tw' },
-    { email: 'jerry@intrising.com.tw' }
-  ]
-  await importUsers(db, newUsers)
+  // const mibs = await db.ref('private-mib').once('value').then((snapshot) => {
+  //   const [{applyTo: mibs, bugFixed, createdAt, custom, feature, status, supportFwVersion, version}] = _.values(snapshot.val())
+  //   // console.log(mibs)
+  //   for (let model in mibs) {
+  //     const url = mibs[model]
+  //     mibs[model] = {
+  //       bugFixed, category: 'swix1', createdAt, updatedAt: createdAt, custom, feature, status, supportFwVersion, version, url
+  //     }
+  //   }
+  //   return mibs
+  // })
+  // await db.ref('privateMIB').set(mibs)
+
+  const products = await db.ref('network/product').once('value').then((snapshot) => {
+    return snapshot.val()
+  })
+
+  for (let pk in products) {
+    const p = products[pk]
+    const table = {
+      Switch1: 'swix1',
+      Switch2: 'swix2',
+      Wireless: 'wrouter',
+      Router: 'router',
+      'Router X': 'routerx'
+    }
+    const newP = { custom: p.custom.toLowerCase() }
+    if (table[p.category] != null) newP.category = table[p.category]
+    if (p.category === 'swix1') {
+      newP.mmsCID = ['5400', '5424', '6300'].includes(p.family)
+        ? 'https://drive.google.com/download?id=0ByPOatSTzklcdnlzd01JT0tGNVU'
+        : 'https://drive.google.com/download?id=0ByPOatSTzklcMXk0enlwX00wclk'
+      console.log(newP)
+    }
+    // await db.ref('network/product').child(pk).update()
+  }
 
   console.timeEnd('Main process')
   close(db)
@@ -48,56 +77,4 @@ async function main (db) {
 function close (db) {
   db.goOffline()
   process.exit()
-}
-
-async function importUsers (db, newUsers) {
-  console.group('Start importing users')
-  for (let { email, password } of newUsers) {
-    console.group(`Handling account: ${email}`)
-    const uid = await signUp(email, password)
-    if (uid == null) {
-      console.groupEnd()
-      console.log('Error occurred')
-      continue
-    }
-    await db.ref('user').child(uid).set({
-      email,
-      role: 'admin',
-      custom: 'all'
-    })
-    console.log('- User info is set up.')
-    console.groupEnd()
-  }
-  console.groupEnd()
-}
-
-function signUp (email, password = '53116727') {
-  return admin.auth().createUser({
-    email,
-    emailVerified: false,
-    password
-  })
-    .then(function (userRecord) {
-    // See the UserRecord reference doc for the contents of userRecord.
-      console.log('- Successfully created new user.')
-      return userRecord.uid
-    })
-    .catch(function (error) {
-      const { code, message } = error
-      if (code === 'auth/email-already-exists') {
-        console.log('(Account existed.)')
-        return admin.auth().getUserByEmail(email)
-          .then(function (userRecord) {
-            const userData = userRecord.toJSON()
-            // console.log(userData)
-            return userData.uid
-          })
-      } else {
-        console.group('(X)Error creating new user')
-        console.log('- Code: ', code)
-        console.log('- Message: ', message)
-        console.groupEnd()
-        return null
-      }
-    })
 }
