@@ -63,11 +63,11 @@ async function main (db) {
     if (table[p.category] != null) newP.category = table[p.category]
     if (p.category === 'swix1') {
       newP.mmsCID = ['5400', '5424', '6300'].includes(p.family)
-        ? 'https://drive.google.com/download?id=0ByPOatSTzklcdnlzd01JT0tGNVU'
-        : 'https://drive.google.com/download?id=0ByPOatSTzklcMXk0enlwX00wclk'
+        ? 'https://drive.google.com/open?id=0ByPOatSTzklcdnlzd01JT0tGNVU'
+        : 'https://drive.google.com/open?id=0ByPOatSTzklcMXk0enlwX00wclk'
       console.log(newP)
     }
-    // await db.ref('network/product').child(pk).update()
+    await db.ref('network/product').child(pk).update(newP)
   }
 
   console.timeEnd('Main process')
