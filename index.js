@@ -33,82 +33,27 @@ function init () {
 async function main (db) {
   console.time('Main process')
 
-  // await transformOldPmib(db)
-  // await syncCategoryAndGenMmsCid(db)
-  // await cleanUselessMib(db)
-  // await db.ref('privateMibNotMapping2Product').once('value').then((snapshot) => {
-  //   const s = snapshot.val()
-  //   return db.ref('privateMIB').set(s)
-  // })
+  await custom2Arr(db)
 
   console.timeEnd('Main process')
   close(db)
 }
 
-async function transformOldPmib (db) {
-  console.time('transformOldPmib')
-  const mibs = await db.ref('private-mib').once('value').then((snapshot) => {
-    const [{applyTo: mibs, bugFixed, createdAt, custom, feature, status, supportFwVersion, version}] = _.values(snapshot.val())
-    // console.log(mibs)
-    for (let model in mibs) {
-      const url = mibs[model]
-      mibs[model] = {
-        bugFixed, category: 'swix1', createdAt, updatedAt: createdAt, custom, feature, status, supportFwVersion, version, url
-      }
-      console.count()
+async function custom2Arr (db) {
+  const ref = 'network/product'
+  let dataset = {}
+  await db.ref(ref).once('value').then((snapshot) => {
+    const products = snapshot.val()
+    for (let pKey in products) {
+      const { custom } = products[pKey]
+      dataset[pKey] = custom
     }
-    return mibs
   })
-  await db.ref('privateMIB').set(mibs)
-  console.timeEnd()
-}
-
-async function syncCategoryAndGenMmsCid (db) {
-  console.time('syncCategoryAndGenMmsCid')
-  const products = await db.ref('network/product').once('value').then((snapshot) => {
-    return snapshot.val()
-  })
-
-  for (let pk in products) {
-    const p = products[pk]
-    const table = {
-      Switch1: 'swix1',
-      Switch2: 'swix2',
-      Wireless: 'wrouter',
-      Router: 'router',
-      'Router X': 'routerx'
-    }
-    const newP = { custom: p.custom.toLowerCase() }
-    if (table[p.category] != null) newP.category = table[p.category]
-    if (p.category === 'swix1') {
-      newP.mmsCID = ['5400', '5424', '6300'].includes(p.family)
-        ? 'https://drive.google.com/open?id=0ByPOatSTzklcdnlzd01JT0tGNVU'
-        : 'https://drive.google.com/open?id=0ByPOatSTzklcMXk0enlwX00wclk'
-      console.log(newP)
-    }
-    await db.ref('network/product').child(pk).update(newP)
+  /* Transform custom to arr */
+  for (let k in dataset) {
+    await db.ref(`${ref}/${k}`).update({ custom: [dataset[k]] })
   }
-  console.timeEnd()
-}
-
-async function cleanUselessMib (db) {
-  const productKeys = await db.ref('network/product').once('value').then((snaphost) => {
-    return _.keys(snaphost.val())
-  })
-  // console.log(productKeys)
-  const dataset = await db.ref('privateMIB').once('value').then((snapshot) => {
-    return _.transform(snapshot.val(), (remove, mib, key) => {
-      const notExisted = _.indexOf(productKeys, key) === -1
-      if (notExisted) {
-        remove.push({ key, ...mib })
-      } else console.log(key)
-    }, [])
-  })
-  // console.log(dataset)
-  for (let mib of dataset) {
-    await db.ref('privateMibNotMapping2Product').child(mib.key).set(mib)
-    await db.ref('privateMIB').child(mib.key).remove()
-  }
+  /* Handle custom-product binding */
 }
 
 function close (db) {
