@@ -3,6 +3,9 @@ import { close, init, logObj } from './lib'
 // import axios from 'axios'
 // import { writeFileSync } from 'fs'
 import _ from 'lodash'
+import { resolve } from 'path'
+
+global.appRoot = resolve(__dirname)
 
 main()
 
