@@ -1,5 +1,5 @@
 import { close, init, logObj } from './lib'
-// import lantechHub from './lib/lantechHub'
+import * as lantechHub from './lib/lantechHub'
 // import axios from 'axios'
 // import { writeFileSync } from 'fs'
 import _ from 'lodash'
