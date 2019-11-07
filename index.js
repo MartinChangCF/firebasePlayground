@@ -1,62 +1,65 @@
-import admin from 'firebase-admin'
-
+import { close, init, logObj } from './lib'
+// import lantechHub from './lib/lantechHub'
 // import axios from 'axios'
+// import { writeFileSync } from 'fs'
 import _ from 'lodash'
 
-const config = {
-  instaair: {
-    credential: admin.credential.cert('./static/key/instaair-a188b-firebase-adminsdk-0rs2x-4f7f4cdee9.json'),
-    databaseURL: 'https://instaair-a188b.firebaseio.com'
-  },
-  intrihub: {
-    credential: admin.credential.cert('./static/key/intrihub-98da3-firebase-adminsdk-hctky-3f1b4b8830.json'),
-    databaseURL: 'https://intrihub-98da3.firebaseio.com'
-  },
-  lantechhub: {
-    credential: admin.credential.cert('./static/key/lantechhub-firebase-adminsdk-bqmj9-48f8f5cb02.json'),
-    databaseURL: 'https://lantechhub.firebaseio.com'
-  },
-  intrinotify: {
-    credential: admin.credential.cert('./static/key/intrinotify-firebase-adminsdk-lv8a8-e8a856ddbc.json'),
-    databaseURL: 'https://intrinotify.firebaseio.com'
-  }
-}
+main()
 
-init()
-
-function init () {
-  admin.initializeApp(config.lantechhub)
-  const db = admin.database()
-  main(db)
-}
-
-async function main (db) {
+async function main () {
   console.time('Main process')
 
-  await custom2Arr(db)
+  await testPermission()
+
+  // await lantechHub.go20191107()
 
   console.timeEnd('Main process')
-  close(db)
 }
 
-async function custom2Arr (db) {
-  const ref = 'network/product'
-  let dataset = {}
-  await db.ref(ref).once('value').then((snapshot) => {
-    const products = snapshot.val()
-    for (let pKey in products) {
-      const { custom } = products[pKey]
-      dataset[pKey] = custom
+/* LantechHub reconstruct functions */
+
+async function testPermission () {
+  console.time('Test Permission')
+  console.group('Test Permission')
+
+  const { db, uid } = await init('app', 'testHub')
+  tests: { // eslint-disable-line
+    const { custom: targetCustom = null } = await db.ref('user').child(uid).once('value')
+      .then((sn) => {
+        return sn.val()
+      })
+      .catch((error) => {
+        console.group(`Get ${uid} info error`)
+        console.log(error.code)
+        console.groupEnd()
+        return {}
+      })
+    if (targetCustom == null) {
+      break tests // eslint-disable-line
     }
-  })
-  /* Transform custom to arr */
-  for (let k in dataset) {
-    await db.ref(`${ref}/${k}`).update({ custom: [dataset[k]] })
-  }
-  /* Handle custom-product binding */
-}
+    const prodList = await db.ref('product').orderByChild(`custom/${targetCustom}`).equalTo(true).once('value')
+      .then((sn) => {
+        const prodList = sn.val()
+        console.log(prodList)
+        return prodList
+      })
+      .catch((error) => {
+        console.group(`Get ${targetCustom} error`)
+        console.log(error.code)
+        console.groupEnd()
+        return null
+      })
+    if (prodList == null) {
+      break tests // eslint-disable-line
+    }
+    console.group(`Get ${targetCustom}:`)
+    logObj(prodList)
+    console.groupEnd()
 
-function close (db) {
-  db.goOffline()
-  process.exit()
+    console.groupEnd()
+  }
+
+  close(db)
+  console.groupEnd()
+  console.timeEnd('Test Permission')
 }
