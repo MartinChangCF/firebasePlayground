@@ -1,0 +1,42 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel src -d dist",
+    "lint": "eslint .",
+    "serve": "firebase serve --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "npm run build && firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "test": "babel-node ./test/run.js",
+    "watch": "babel src --watch -d dist",
+    "dev": "concurrently 'npm run watch' 'npm run serve'"
+  },
+  "engines": {
+    "node": "8"
+  },
+  "dependencies": {
+    "firebase-admin": "^8.0.0",
+    "firebase-functions": "^3.1.0",
+    "lodash": "^4.17.4",
+    "validate": "^5.1.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.7.2",
+    "@babel/node": "^7.7.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.2.0",
+    "concurrently": "^5.0.0",
+    "firebase-functions-test": "^0.1.6",
+    "firebase-tools": "^7.3.0"
+  },
+  "private": true,
+  "babel": {
+    "presets": [],
+    "plugins": [
+      "@babel/plugin-transform-modules-commonjs"
+    ]
+  }
+}

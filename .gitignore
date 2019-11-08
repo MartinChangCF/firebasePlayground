@@ -119,3 +119,6 @@ typings/
 
 # firebase key
 static/key
+
+# firebase function build file can be ignored due to it'll be update everytime
+functions/dist
