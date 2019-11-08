@@ -1,9 +1,10 @@
-import { close, init } from './lib'
 import * as lantechHub from './lib/lantechHub'
+import { resolve } from 'path'
+
+// import { close, init } from './lib'
 // import axios from 'axios'
 // import { writeFileSync } from 'fs'
-import _ from 'lodash'
-import { resolve } from 'path'
+// import _ from 'lodash'
 
 global.appRoot = resolve(__dirname)
 
