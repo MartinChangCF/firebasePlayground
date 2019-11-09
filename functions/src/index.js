@@ -48,23 +48,33 @@ function validateBodyProps (https, schema) {
 }
 
 function isFromIntrising ({ req, res }) {
-  console.group('Validate - Show request information')
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
-  console.log(`IP: ${ip}`)
-  console.groupEnd()
+  console.log(`Validate IP ${ip} which is ${ip === intrisingIp ? '' : 'not'} from Intrising.`)
   return ip === intrisingIp
 }
 
-function errorHandler (https, error) {
-  console.log(error)
+function errorHandler (https, error, psInfo) {
+  console.log(psInfo == null ? '' : `[${psInfo}]` + ` ${error.name}: ${error.message}`)
   if (isFromIntrising(https)) {
     https.res.status(500).json({
       message: 'Failed',
-      error
+      error: error.message
     })
   } else {
     https.res.status(500).json({
       message: 'Failed'
+    })
+  }
+}
+
+function successHandler (https, message = 'ok') {
+  if (!isFromIntrising(https)) {
+    https.res.status(200).json({
+      message: 'ok'
+    })
+  } else {
+    https.res.status(200).json({
+      message
     })
   }
 }
@@ -79,18 +89,23 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
 
   /* Check if exists */
   const {
-    version,
+    version: originalVersion,
     custom,
     models,
     status,
     feature
   } = req.body
 
-  const dupMibKey = dbRef.mibEntry
+  /* Due to the fdb key can't contain '.', only value can */
+  const version = originalVersion.split('.').join('!')
+
+  const dupMibKey = await dbRef.mibEntry
     .orderByChild('custom_version')
     .equalTo(`${custom}_${version}`)
     .once('value')
-    .then((snapshot) => snapshot.key)
+    .then((snapshot) => {
+      return keys(snapshot.val())[0]
+    })
     .catch((error) => errorHandler(https, error))
 
   const mibUrls = transform(models, (result, value, key) => {
@@ -111,10 +126,12 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
       .update({
         updatedAt: dbTime,
         models: newModels,
+        custom,
+        custom_version: `${custom}_${version}`,
         status,
         feature
       })
-      .catch((error) => errorHandler(https, error))
+      .catch((error) => errorHandler(https, error, ''))
     // Renew "dbRef.mibDownload", by creating a group update to handle adding for new and removing for old
     const mergedMibUrls = await dbRef.mibDownload
       .orderByKey()
@@ -128,17 +145,21 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
       })
       .catch((error) => errorHandler(https, error))
     await dbRef.mibDownload.update(mergedMibUrls).catch((error) => errorHandler(https, error))
+    successHandler(https, 'updated')
   } else {
     await dbRef.mibEntry
       .push({
         createdAt: dbTime,
         updatedAt: dbTime,
+        version: originalVersion,
         models: newModels,
+        custom,
+        custom_version: `${custom}_${version}`,
         status,
         feature
       })
       .catch((error) => errorHandler(https, error))
     await dbRef.mibDownload.update(mibUrls).catch((error) => errorHandler(https, error))
+    successHandler(https, 'created')
   }
-  return res.status(200).json({ message: 'ok' })
 })

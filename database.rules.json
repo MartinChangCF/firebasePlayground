@@ -28,7 +28,27 @@
         "custom/lantech_trafsys",
         "custom/lantech_21net"
       ],
-      "$pid": ""
+      "$pid": {}
+    },
+    "mib": {
+      ".read": false,
+      ".write": false,
+      "download": {
+        ".read": "false",
+        ".write": false,
+        "$did": {
+
+        }
+      },
+      "entry": {
+        ".read": "query.orderByChild == 'custom' && query.equalTo == root.child('user').child(auth.uid).child('custom').val()",
+        ".write": false,
+        ".indexOn": ["custom", "custom_version"],
+        "$eid": {
+          ".read": "$eid.contains(root.child('user').child(auth.uid).child('custom').val())",
+          ".write": false
+        }
+      }
     }
   }
 }
