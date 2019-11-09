@@ -108,16 +108,17 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
     })
     .catch((error) => errorHandler(https, error))
 
-  const mibUrls = transform(models, (result, value, key) => {
-    const { model, layer2Url, layer3Url } = value
+  const mibUrls = transform(models, (result, { layer2Url = null, layer3Url = null, model }, key) => {
     result[`${custom}_${version}_${model}_l2`] = layer2Url
     result[`${custom}_${version}_${model}_l3`] = layer3Url
   }, {})
 
-  const newModels = transform(models, (result, { category, model }, index) => {
+  const newModels = transform(models, (result, { category, layer2Url = null, layer3Url = null, model }, index) => {
     result.push({
       category,
-      model
+      model,
+      layer2: layer2Url != null,
+      layer3: layer3Url != null
     })
   })
 
