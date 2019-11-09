@@ -29,7 +29,8 @@ const customs = {
     'lantech_acrobel',
     'lantech_intrising',
     'lantech_trafsys',
-    'lantech_21net'
+    'lantech_21net',
+    'lantech_pandacom'
   ]
 }
 const categories = [
