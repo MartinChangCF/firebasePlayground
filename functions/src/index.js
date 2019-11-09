@@ -47,10 +47,17 @@ function validateBodyProps (https, schema) {
   }
 }
 
+/*
+  For Postman developing trick,
+  provide more info when using query:"?intrising=53116727" with url:"localhost" request
+*/
 function isFromIntrising ({ req, res }) {
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
-  console.log(`Validate IP ${ip} which is ${ip === intrisingIp ? '' : 'not'} from Intrising.`)
-  return ip === intrisingIp
+  let hint = ''
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'anonymous'
+  const hasKeyword = req.hostname === 'localhost' && req.query.intrising === '53116727'
+  hint = `Request from ${ip} is ${ip === intrisingIp ? '' : 'not '}from Intrising and has ${hasKeyword ? '' : 'no '}magic words.`
+  console.log(hint)
+  return (ip === intrisingIp) || hasKeyword
 }
 
 function errorHandler (https, error, psInfo) {
@@ -67,14 +74,14 @@ function errorHandler (https, error, psInfo) {
   }
 }
 
-function successHandler (https, message = 'ok') {
-  if (!isFromIntrising(https)) {
+function successHandler (https, more) {
+  if (isFromIntrising(https)) {
     https.res.status(200).json({
-      message: 'ok'
+      ...more
     })
   } else {
     https.res.status(200).json({
-      message
+      message: 'ok'
     })
   }
 }
@@ -113,13 +120,28 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
     result[`${custom}_${version}_${model}_l3`] = layer3Url
   }, {})
 
+  const invalidModel = {
+    pool: [],
+    warning: () => {
+      return {
+        title: 'Require at least one download link for a model entry or will be ignored.',
+        ignoredCount: invalidModel.pool.length,
+        ignored: invalidModel.pool
+      }
+    }
+  }
   const newModels = transform(models, (result, { category, layer2Url = null, layer3Url = null, model }, index) => {
-    result.push({
-      category,
-      model,
-      layer2: layer2Url != null,
-      layer3: layer3Url != null
-    })
+    /* Skip both null situ and res with warning */
+    if (layer2Url == null && layer3Url == null) {
+      invalidModel.pool.push(`${custom}_${originalVersion}_${model}`)
+    } else {
+      result.push({
+        category,
+        model,
+        layer2: layer2Url != null,
+        layer3: layer3Url != null
+      })
+    }
   })
 
   if (dupMibKey != null) {
@@ -128,11 +150,12 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
         updatedAt: dbTime,
         models: newModels,
         custom,
-        custom_version: `${custom}_${version}`,
+        customVersion: `${custom}_${version}`,
         status,
         feature
       })
       .catch((error) => errorHandler(https, error, ''))
+
     // Renew "dbRef.mibDownload", by creating a group update to handle adding for new and removing for old
     const mergedMibUrls = await dbRef.mibDownload
       .orderByKey()
@@ -146,7 +169,16 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
       })
       .catch((error) => errorHandler(https, error))
     await dbRef.mibDownload.update(mergedMibUrls).catch((error) => errorHandler(https, error))
-    successHandler(https, 'updated')
+
+    /* Check if there are invalid model entry */
+    if (invalidModel.pool.length) {
+      successHandler(https, {
+        message: 'updated',
+        warning: invalidModel.warning()
+      })
+    } else {
+      successHandler(https, { message: 'updated' })
+    }
   } else {
     await dbRef.mibEntry
       .push({
@@ -155,12 +187,21 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
         version: originalVersion,
         models: newModels,
         custom,
-        custom_version: `${custom}_${version}`,
+        customVersion: `${custom}_${version}`,
         status,
         feature
       })
       .catch((error) => errorHandler(https, error))
     await dbRef.mibDownload.update(mibUrls).catch((error) => errorHandler(https, error))
-    successHandler(https, 'created')
+
+    /* Check if there are invalid model entry */
+    if (invalidModel.pool.length) {
+      successHandler(https, {
+        message: 'updated',
+        warning: invalidModel.warning()
+      })
+    } else {
+      successHandler(https, { message: 'updated' })
+    }
   }
 })
