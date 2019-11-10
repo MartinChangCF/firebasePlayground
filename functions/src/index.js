@@ -96,7 +96,7 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
 
   /* Check if exists */
   const {
-    version: originalVersion,
+    version,
     custom,
     models,
     status,
@@ -104,10 +104,10 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
   } = req.body
 
   /* Due to the fdb key can't contain '.', only value can */
-  const version = originalVersion.split('.').join('!')
+  const formattedVersion = version.split('.').join('!')
 
   const dupMibKey = await dbRef.mibEntry
-    .orderByChild('custom_version')
+    .orderByChild('customVersion')
     .equalTo(`${custom}_${version}`)
     .once('value')
     .then((snapshot) => {
@@ -115,9 +115,9 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
     })
     .catch((error) => errorHandler(https, error))
 
-  const mibUrls = transform(models, (result, { layer2Url = null, layer3Url = null, model }, key) => {
-    result[`${custom}_${version}_${model}_l2`] = layer2Url
-    result[`${custom}_${version}_${model}_l3`] = layer3Url
+  const mibUrls = transform(models, (result, { l2Url = null, l3Url = null, model }, key) => {
+    result[`${custom}_${formattedVersion}_${model}_l2`] = l2Url
+    result[`${custom}_${formattedVersion}_${model}_l3`] = l3Url
   }, {})
 
   const invalidModel = {
@@ -130,16 +130,16 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
       }
     }
   }
-  const newModels = transform(models, (result, { category, layer2Url = null, layer3Url = null, model }, index) => {
+  const newModels = transform(models, (result, { category, l2Url = null, l3Url = null, model }, index) => {
     /* Skip both null situ and res with warning */
-    if (layer2Url == null && layer3Url == null) {
-      invalidModel.pool.push(`${custom}_${originalVersion}_${model}`)
+    if (l2Url == null && l3Url == null) {
+      invalidModel.pool.push(`${custom}_${version}_${model}`)
     } else {
       result.push({
         category,
         model,
-        layer2: layer2Url != null,
-        layer3: layer3Url != null
+        l2: l2Url != null,
+        l3: l3Url != null
       })
     }
   })
@@ -159,7 +159,7 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
     // Renew "dbRef.mibDownload", by creating a group update to handle adding for new and removing for old
     const mergedMibUrls = await dbRef.mibDownload
       .orderByKey()
-      .startAt(`${custom}_${version}`)
+      .startAt(`${custom}_${formattedVersion}`)
       .once('value')
       .then((sn) => {
         const oldMibUrlsToNull = transform(keys(sn.val()), (result, value, index) => {
@@ -184,7 +184,7 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
       .push({
         createdAt: dbTime,
         updatedAt: dbTime,
-        version: originalVersion,
+        version,
         models: newModels,
         custom,
         customVersion: `${custom}_${version}`,

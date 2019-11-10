@@ -83,11 +83,11 @@ export const schemas = {
             required: true,
             enum: categories
           },
-          layer2Url: {
+          l2Url: {
             type: String,
             ...(newRules.url)
           },
-          layer3Url: {
+          l3Url: {
             type: String,
             ...(newRules.url)
           },

@@ -22,8 +22,8 @@ export function testMibSchema () {
     custom: 'lantech_lantech',
     models: [{
       category: 'swix1',
-      layer2Url: '',
-      layer3Url: '',
+      l2Url: '',
+      l3Url: '',
       model: 'APBP'
     }],
     status: 'release'
