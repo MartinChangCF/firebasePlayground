@@ -36,7 +36,7 @@ export async function go20191110 () {
   console.time('2019/11/10')
   console.group('2019/11/10')
 
-  await lantechHub.reconstructMib()
+  await lantechHub.reconstructUser()
 
   console.groupEnd()
   console.timeEnd('2019/11/10')
