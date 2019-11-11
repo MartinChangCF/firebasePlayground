@@ -25,9 +25,11 @@ const customs = {
     'lantech_lantech',
     'lantech_lgu+',
     'lantech_ltdp',
+    'lantech_optigo',
     'lantech_pandacom',
     'lantech_ruf',
     'lantech_tekdis',
+    'lantech_teslakom',
     'lantech_trafsys',
     'lantech_turkey'
   ]
