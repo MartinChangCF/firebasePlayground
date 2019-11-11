@@ -16,21 +16,20 @@ const customs = {
     /*
       'lantech' for higher authority to view all custom below,
       therefore adding below custom requires add 'lantech' too.
-    */
-    'lantech_lantech',
-    'lantech_turkey',
-    'lantech_germany',
-    'lantech_canada',
-    'lantech_hytec',
-    'lantech_lgu+',
-    'lantech_ruf',
-    'lantech_ltdp',
-    'lantech_tekdis',
-    'lantech_acrobel',
-    'lantech_intrising',
-    'lantech_trafsys',
+      */
     'lantech_21net',
-    'lantech_pandacom'
+    'lantech_acrobel',
+    'lantech_canada',
+    'lantech_germany',
+    'lantech_hytec',
+    'lantech_lantech',
+    'lantech_lgu+',
+    'lantech_ltdp',
+    'lantech_pandacom',
+    'lantech_ruf',
+    'lantech_tekdis',
+    'lantech_trafsys',
+    'lantech_turkey'
   ]
 }
 const categories = [
