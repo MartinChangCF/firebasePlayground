@@ -4,14 +4,37 @@
     ".write": false,
     "user": {
       ".read": false,
-    	".write": false,
+      ".write": false,
       "$uid": {
         ".read": "auth.uid == $uid",
-    		".write": false
+        ".write": "auth.uid == $uid"
       }
     },
+    "firmware": {
+      ".read": "
+      root.child('user').child(auth.uid).child('role').val() === 'admin' ||
+      root.child('user').child(auth.uid).child('role').val() === 'vendor' ||
+      (
+        query.orderByChild == 'custom' && (
+          query.equalTo == root.child('user').child(auth.uid).child('custom').val() ||
+          (
+            query.startAt == root.child('user').child(auth.uid).child('custom').val() &&
+            query.endAt == root.child('user').child(auth.uid).child('custom').val()
+          )
+        )
+      )
+      ",
+      ".write": "root.child('user').child(auth.uid).child('role').val() === 'admin' ||
+      query.orderByChild == 'custom' && query.equalTo == root.child('user').child(auth.uid).child('custom').val()
+      ",
+      ".indexOn": ["custom"]
+    },
     "product": {
-      ".read": "query.orderByChild != null && query.equalTo == root.child('user').child(auth.uid).child('custom').val()",
+      ".read": "
+      root.child('user').child(auth.uid).child('role').val() === 'admin' ||
+      root.child('user').child(auth.uid).child('role').val() === 'vendor' ||
+      query.orderByChild != null && query.equalTo == root.child('user').child(auth.uid).child('custom').val()
+      ",
       ".write": false,
       ".indexOn": [
         "custom/lantech_lantech",
@@ -28,20 +51,39 @@
         "custom/lantech_trafsys",
         "custom/lantech_21net"
       ],
-      "$pid": {}
+      "$pid": {
+        ".write": "root.child('user').child(auth.uid).child('role').val() === 'admin'"
+      }
     },
     "mib": {
       ".read": false,
       ".write": false,
       "download": {
         ".read": "false",
-        ".write": false,
+        ".write": "false",
         "$did": {
-
+          ".read": "
+          root.child('user').child(auth.uid).child('role').val() === 'admin' ||
+          root.child('user').child(auth.uid).child('role').val() === 'vendor' ||
+          $did.contains(root.child('user').child(auth.uid).child('custom').val())
+          ",
+          ".write": "false",
         }
       },
       "entry": {
-        ".read": "query.orderByChild == 'custom' && query.equalTo == root.child('user').child(auth.uid).child('custom').val()",
+        ".read": "
+        root.child('user').child(auth.uid).child('role').val() === 'admin' ||
+        root.child('user').child(auth.uid).child('role').val() === 'vendor' ||
+        (
+          query.orderByChild == 'custom' && (
+            query.equalTo == root.child('user').child(auth.uid).child('custom').val() ||
+            (
+              query.startAt == root.child('user').child(auth.uid).child('custom').val() &&
+              query.endAt == root.child('user').child(auth.uid).child('custom').val()
+            )
+          )
+        )
+        ",
         ".write": false,
         ".indexOn": ["custom", "custom_version"],
         "$eid": {
