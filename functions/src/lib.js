@@ -65,6 +65,9 @@ export const schemas = {
   },
   reqBody: {
     mib: new Schema({
+      intrising: { // the magic word for external info from out of company IP
+        type: String
+      },
       version: {
         type: String,
         required: true
