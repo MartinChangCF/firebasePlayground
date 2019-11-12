@@ -18,8 +18,8 @@ async function main () {
   console.group('Main Process')
   console.time('Main process')
 
-  await go20191112()
-  // await upgradeLantechHub()
+  // await go20191112()
+  await upgradeLantechHub()
 
   /*
   When handling firmware, there is a case needs to be aware of.
@@ -43,9 +43,9 @@ export async function upgradeLantechHub () {
 
   const {
     db
-  } = await init('admin', 'lantechHub')
-  await lantechHub.resetCurrDb(db)
+  } = await init('admin', 'lantechhub')
   await lantechHub.reconstruct(db)
+  await lantechHub.clearPreviousHub(db)
 
   console.groupEnd()
   console.timeEnd('2019/11/12')
@@ -59,8 +59,8 @@ export async function go20191112 () {
   const {
     db
   } = await init('admin', 'testHub')
-  // await lantechHub.resetCurrDb(db)
-  // await lantechHub.reconstruct(db)
+  await lantechHub.resetCurrDb(db)
+  await lantechHub.reconstruct(db)
   await lantechHub.clearPreviousHub(db)
 
   console.groupEnd()
