@@ -27,7 +27,21 @@
       ".write": "root.child('user').child(auth.uid).child('role').val() === 'admin' ||
       query.orderByChild == 'custom' && query.equalTo == root.child('user').child(auth.uid).child('custom').val()
       ",
-      ".indexOn": ["custom"]
+      ".indexOn": ["custom"],
+      "$fid": {
+        "updatedAt": {
+          ".write": "root.child('user').child(auth.uid).child('role').val() === 'vendor'"
+        },
+        "feature": {
+          ".write": "root.child('user').child(auth.uid).child('role').val() === 'vendor'"
+        },
+        "bugFixed": {
+          ".write": "root.child('user').child(auth.uid).child('role').val() === 'vendor'"
+        },
+        "modelTxt": {
+          ".write": "root.child('user').child(auth.uid).child('role').val() === 'vendor'"
+        }
+      }
     },
     "product": {
       ".read": "
@@ -37,19 +51,21 @@
       ",
       ".write": false,
       ".indexOn": [
-        "custom/lantech_lantech",
-        "custom/lantech_turkey",
-        "custom/lantech_germany",
-        "custom/lantech_canada",
-        "custom/lantech_hytec",
-        "custom/lantech_lgu+",
-        "custom/lantech_ruf",
-        "custom/lantech_ltdp",
-        "custom/lantech_tekdis",
+        "custom/lantech_21net",
         "custom/lantech_acrobel",
-        "custom/lantech_intrising",
+        "custom/lantech_canada",
+        "custom/lantech_germany",
+        "custom/lantech_hytec",
+        "custom/lantech_lantech",
+        "custom/lantech_lgu+",
+        "custom/lantech_ltdp",
+        "custom/lantech_optigo",
+        "custom/lantech_pandacom",
+        "custom/lantech_ruf",
+        "custom/lantech_tekdis",
+        "custom/lantech_teslakom",
         "custom/lantech_trafsys",
-        "custom/lantech_21net"
+        "custom/lantech_turkey"
       ],
       "$pid": {
         ".write": "root.child('user').child(auth.uid).child('role').val() === 'admin'"
@@ -88,7 +104,13 @@
         ".indexOn": ["custom", "custom_version"],
         "$eid": {
           ".read": "$eid.contains(root.child('user').child(auth.uid).child('custom').val())",
-          ".write": false
+          ".write": "root.child('user').child(auth.uid).child('role').val() === 'admin'",
+          "feature": {
+            ".write": "root.child('user').child(auth.uid).child('role').val() === 'vendor'"
+          },
+          "updatedAt": {
+            ".write": "root.child('user').child(auth.uid).child('role').val() === 'vendor'"
+          }
         }
       }
     }

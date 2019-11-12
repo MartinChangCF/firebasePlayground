@@ -18,7 +18,8 @@ async function main () {
   console.group('Main Process')
   console.time('Main process')
 
-  await go20191111()
+  await go20191112()
+  // await upgradeLantechHub()
 
   /*
   When handling firmware, there is a case needs to be aware of.
@@ -36,41 +37,33 @@ async function main () {
   process.exit()
 }
 
-export async function go20191111 () {
-  console.time('2019/11/10')
-  console.group('2019/11/10')
-
-  // const {
-  //   db,
-  //   uid
-  // } = await init('app', 'testHub')
-
-  // const { custom } = await db.ref('user').child(uid).once('value')
-  //   .then((sn) => {
-  //     return sn.val()
-  //   })
-
-  // console.log(custom)
-  // // await db.ref('product').orderByChild(`custom/${custom}`).equalTo(custom).once('value')
-  // await db.ref('firmware').orderByChild(`custom`).startAt(custom).once('value')
-  //   .then((sn) => {
-  //     const data = _.groupBy(sn.val(), 'custom')
-  //     for (let k in data) {
-  //       data[k] = data[k].length
-  //     }
-  //     console.log(data)
-  //   })
-  //   .catch((error) => {
-  //     console.log(error)
-  //   })
+export async function upgradeLantechHub () {
+  console.time('2019/11/12')
+  console.group('2019/11/12')
 
   const {
     db
-  } = await init('admin', 'testHub')
+  } = await init('admin', 'lantechHub')
   await lantechHub.resetCurrDb(db)
   await lantechHub.reconstruct(db)
 
   console.groupEnd()
-  console.timeEnd('2019/11/10')
+  console.timeEnd('2019/11/12')
+  close(db)
+}
+
+export async function go20191112 () {
+  console.time('2019/11/12')
+  console.group('2019/11/12')
+
+  const {
+    db
+  } = await init('admin', 'testHub')
+  // await lantechHub.resetCurrDb(db)
+  // await lantechHub.reconstruct(db)
+  await lantechHub.clearPreviousHub(db)
+
+  console.groupEnd()
+  console.timeEnd('2019/11/12')
   close(db)
 }
