@@ -12,11 +12,9 @@ export function naturalSorting (data, key, option = 'asc') {
 }
 
 const customs = {
-  forMib: () => [
-    /*
-      'lantech' for higher authority to view all custom below,
-      therefore adding below custom requires add 'lantech' too.
-      */
+  network: [ // For network devices
+    'intrising',
+    /* 'lantech_' is to identify the vendor_custom relationship */
     'lantech_21net',
     'lantech_acrobel',
     'lantech_canada',
@@ -32,6 +30,11 @@ const customs = {
     'lantech_teslakom',
     'lantech_trafsys',
     'lantech_turkey'
+  ],
+  controller: [ // For av over ip contoller
+    'intri',
+    'eagleyes',
+    'evoip'
   ]
 }
 const categories = [
@@ -40,6 +43,13 @@ const categories = [
   'wrouter',
   'router',
   'routerx'
+]
+
+const statusOpts = [
+  'release',
+  'beta',
+  'alpha',
+  'develop'
 ]
 
 const newRules = {
@@ -67,7 +77,8 @@ export const schemas = {
   reqBody: {
     mib: new Schema({
       intrising: { // the magic word for external info from out of company IP
-        type: String
+        type: String,
+        enum: ['53116727']
       },
       version: {
         type: String,
@@ -76,7 +87,7 @@ export const schemas = {
       custom: {
         type: String,
         required: true,
-        enum: customs.forMib()
+        enum: customs.network
       },
       models: {
         type: Array,
@@ -104,12 +115,7 @@ export const schemas = {
       status: {
         type: String,
         required: true,
-        enum: [
-          'release',
-          'beta',
-          'alpha',
-          'develop'
-        ]
+        enum: statusOpts
       },
       feature: {
         type: String,
@@ -117,6 +123,58 @@ export const schemas = {
       }
     }),
     firmware: new Schema({
+      intrising: { // the magic word for external info from out of company IP
+        type: String,
+        enum: ['53116727']
+      },
+      /*
+        Removed:
+        - domain (for controller, may replaced by 'custom'?)
+        - model (for controller)
+      */
+      bugFixed: {
+        type: String
+      },
+      category: {
+        type: String,
+        required: true,
+        enum: categories
+      },
+      custom: {
+        type: String,
+        required: true,
+        enum: customs.network
+      },
+      feature: {
+        type: String
+      },
+      firmwareLayer: {
+        type: Number,
+        required: true,
+        enum: [2, 3]
+      },
+      md5: {
+        type: String,
+        required: true,
+        length: 32
+      },
+      modelTxt: {
+        type: String
+      },
+      status: {
+        type: String,
+        required: true,
+        enum: statusOpts
+      },
+      testReportUrl: {
+        type: String,
+        ...(newRules.url)
+      },
+      url: {
+        type: String,
+        required: true,
+        ...(newRules.url)
+      },
       version: {
         type: String,
         required: true

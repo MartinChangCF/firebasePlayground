@@ -10,7 +10,8 @@ const db = admin.database()
 const dbTime = admin.database.ServerValue.TIMESTAMP
 const dbRef = {
   mibEntry: db.ref('mib/entry'),
-  mibDownload: db.ref('mib/download')
+  mibDownload: db.ref('mib/download'),
+  fw: db.ref('firmware')
 }
 
 function validateReq ({req, res}) {
@@ -198,11 +199,75 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
     /* Check if there are invalid model entry */
     if (invalidModel.pool.length) {
       successHandler(https, {
-        message: 'updated',
+        message: 'created',
         warning: invalidModel.warning()
       })
     } else {
-      successHandler(https, { message: 'updated' })
+      successHandler(https, { message: 'created' })
     }
+  }
+})
+
+exports.importFirmware = functions.https.onRequest(async (req, res) => {
+  const https = {
+    req,
+    res
+  }
+  if (!validateReq(https)) return null
+  if (!validateBodyProps(https, schemas.reqBody.firmware)) return null
+
+  const {
+    bugFixed,
+    category,
+    custom,
+    feature,
+    firmwareLayer,
+    md5,
+    modelTxt,
+    status,
+    testReportUrl,
+    url,
+    version
+  } = req.body
+
+  const fwUniqKey = `${custom}_${category}_${version}`
+
+  const dupFwKey = await dbRef.fw
+    .orderByChild('customCategoryVersion')
+    .equalTo(fwUniqKey)
+    .once('value')
+    .then((snapshot) => {
+      return keys(snapshot.val())[0]
+    })
+    .catch((error) => errorHandler(https, error))
+
+  if (dupFwKey != null) {
+    await dbRef.fw.child(dupFwKey)
+      .update({
+        updatedAt: dbTime,
+        url,
+        md5
+      })
+      .catch((error) => errorHandler(https, error, ''))
+    successHandler(https, { message: 'updated' })
+  } else {
+    await dbRef.fw
+      .push({
+        bugFixed,
+        createdAt: dbTime,
+        category,
+        custom,
+        feature,
+        firmwareLayer,
+        md5,
+        modelTxt,
+        status,
+        testReportUrl,
+        updatedAt: dbTime,
+        url,
+        version
+      })
+      .catch((error) => errorHandler(https, error))
+    successHandler(https, { message: 'created' })
   }
 })
