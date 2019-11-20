@@ -19,7 +19,7 @@ async function main () {
   console.time('Main process')
 
   // await go20191112()
-  await upgradeLantechHub()
+  await go20191121()
 
   /*
   When handling firmware, there is a case needs to be aware of.
@@ -65,5 +65,19 @@ export async function go20191112 () {
 
   console.groupEnd()
   console.timeEnd('2019/11/12')
+  close(db)
+}
+
+export async function go20191121 () {
+  console.time('2019/11/21')
+  console.group('2019/11/21')
+
+  const {
+    db
+  } = await init('admin', 'lantechhub')
+  await lantechHub.createFwUniqKey(db)
+
+  console.groupEnd()
+  console.timeEnd('2019/11/21')
   close(db)
 }
