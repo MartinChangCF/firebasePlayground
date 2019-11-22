@@ -78,9 +78,7 @@ function errorHandler (https, error, psInfo) {
 
 function successHandler (https, more) {
   if (isFromIntrising(https)) {
-    https.res.status(200).json({
-      ...more
-    })
+    https.res.status(200).json(more)
   } else {
     https.res.status(200).json({
       message: 'ok'
@@ -270,4 +268,35 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
       .catch((error) => errorHandler(https, error))
     successHandler(https, { message: 'created' })
   }
+})
+
+exports.getProductModel = functions.https.onRequest(async (req, res) => {
+  const https = {
+    req,
+    res
+  }
+  if (!validateReq(https)) return null
+  if (!validateBodyProps(https, schemas.reqBody.getProductModel)) return null
+
+  const { category } = req.body
+
+  const ref = 'product'
+  const products = {}
+  for (let x of category) {
+    products[x] = await admin.database()
+      .ref(ref)
+      .orderByChild('category')
+      .equalTo(x)
+      .once('value')
+      .then((snapshot) => {
+        return transform(snapshot.val(), (result, val, key) => {
+          if (val.status === 'release') {
+            result.push(key)
+          }
+        }, [])
+      })
+      .catch(error => errorHandler(https, error))
+  }
+
+  successHandler(https, products)
 })

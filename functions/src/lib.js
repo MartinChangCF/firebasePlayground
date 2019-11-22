@@ -179,6 +179,20 @@ export const schemas = {
         type: String,
         required: true
       }
+    }),
+    getProductModel: new Schema({
+      category: {
+        type: Array,
+        required: true,
+        length: {
+          min: 1,
+          max: 4
+        },
+        each: {
+          type: String,
+          enum: categories
+        }
+      }
     })
   },
   db: {}
