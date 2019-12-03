@@ -181,6 +181,10 @@ export const schemas = {
       }
     }),
     getProductModel: new Schema({
+      intrising: { // the magic word for external info from out of company IP
+        type: String,
+        enum: ['53116727']
+      },
       category: {
         type: Array,
         required: true,
