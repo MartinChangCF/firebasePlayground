@@ -14,7 +14,7 @@ const dbRef = {
   fw: db.ref('firmware')
 }
 
-function validateReq ({req, res}) {
+function validateReq ({ req, res }) {
   if (req.method !== 'POST') {
     res.status(400).json({
       message: 'Only POST.'
@@ -223,7 +223,7 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
     md5,
     modelTxt,
     status,
-    testReportUrl,
+    testReportUrl = '',
     url,
     version
   } = req.body
@@ -251,6 +251,7 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
   } else {
     await dbRef.fw
       .push({
+        customCategoryVersion: fwUniqKey,
         bugFixed,
         createdAt: dbTime,
         category,
@@ -282,7 +283,7 @@ exports.getProductModel = functions.https.onRequest(async (req, res) => {
 
   const ref = 'product'
   const products = {}
-  for (let x of category) {
+  for (const x of category) {
     products[x] = await admin.database()
       .ref(ref)
       .orderByChild('category')
