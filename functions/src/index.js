@@ -17,11 +17,32 @@ const dbRef = {
 function validateReq ({ req, res }) {
   if (req.method !== 'POST') {
     res.status(400).json({
-      message: 'Only POST.'
+      message: 'only POST'
     })
     return false
   }
   return true
+}
+
+/*
+  For security issue, check IP first and if outside Intrising, use Basic Authentication to varify access permission.
+    - Basic aW50cmlzaW5nOjUzMTE2NzI3Cg
+  And for develop, using localhost is ok.
+*/
+function validatePermission ({ req, res }) {
+  const ip = req.get('X-Forwarded-For') || req.connection.remoteAddress || 'anonymous'
+  const ipOk = ip === intrisingIp
+  const authOk = req.get('Authorization') === 'Basic aW50cmlzaW5nOjUzMTE2NzI3' // intrising:53116727 in base64
+  const fcfLog = `Request permission check: ${ipOk || authOk ? 'passed' : 'failed'} (IP is ${ipOk ? 'correct' : ip} and basic auth ${authOk ? 'correct' : 'incorrect'})`
+  console.log(fcfLog)
+  if (ipOk || authOk) {
+    return true
+  } else {
+    res.status(401).json({
+      message: 'permsission denied'
+    })
+    return false
+  }
 }
 
 function validateBodyProps (https, schema) {
@@ -31,15 +52,9 @@ function validateBodyProps (https, schema) {
   } = https
   const errors = schema.validate(req.body)
   if (errors.length) {
-    let msg = {
-      message: 'Invalid req.body props.'
-    }
-    if (isFromIntrising(https)) {
-      msg = {
-        ...msg,
-        isFromIntrising: true,
-        detail: schemas.show(errors)
-      }
+    const msg = {
+      message: 'invalid req.body props',
+      detail: schemas.show(errors)
     }
     res.status(400).json(msg)
     return false
@@ -48,42 +63,16 @@ function validateBodyProps (https, schema) {
   }
 }
 
-/*
-  For Postman developing trick,
-  provide more info when using query:"?intrising=53116727" with url:"localhost" request
-*/
-function isFromIntrising ({ req, res }) {
-  if (req.hostname === 'localhost') return true
-  let hint = ''
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'anonymous'
-  const hasKeyword = req.body.intrising === '53116727'
-  hint = `Request from ${ip} is ${ip === intrisingIp ? '' : 'not '}from Intrising and has ${hasKeyword ? '' : 'no '}magic words.`
-  console.log(hint)
-  return (ip === intrisingIp) || hasKeyword
+function errorHandler (https, error, fname = '') {
+  console.log(fname === '' ? '' : `[${fname}] ` + `${error.name}: ${error.message}`)
+  https.res.status(500).json({
+    message: 'failed',
+    error: error.message
+  })
 }
 
-function errorHandler (https, error, psInfo) {
-  console.log(psInfo == null ? '' : `[${psInfo}]` + ` ${error.name}: ${error.message}`)
-  if (isFromIntrising(https)) {
-    https.res.status(500).json({
-      message: 'Failed',
-      error: error.message
-    })
-  } else {
-    https.res.status(500).json({
-      message: 'Failed'
-    })
-  }
-}
-
-function successHandler (https, more) {
-  if (isFromIntrising(https)) {
-    https.res.status(200).json(more)
-  } else {
-    https.res.status(200).json({
-      message: 'ok'
-    })
-  }
+function successHandler (https, msg = { message: 'ok' }) {
+  https.res.status(200).json(msg)
 }
 
 exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
@@ -91,6 +80,8 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
     req,
     res
   }
+
+  if (!validatePermission(https)) return null
   if (!validateReq(https)) return null
   if (!validateBodyProps(https, schemas.reqBody.mib)) return null
 
@@ -100,7 +91,7 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
     custom,
     models,
     status,
-    feature
+    feature = ''
   } = req.body
 
   /* Due to the fdb key can't contain '.', only value can */
@@ -154,7 +145,7 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
         status,
         feature
       })
-      .catch((error) => errorHandler(https, error, ''))
+      .catch((error) => errorHandler(https, error))
 
     // Renew "dbRef.mibDownload", by creating a group update to handle adding for new and removing for old
     const mergedMibUrls = await dbRef.mibDownload
@@ -211,17 +202,19 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
     req,
     res
   }
+
+  if (!validatePermission(https)) return null
   if (!validateReq(https)) return null
   if (!validateBodyProps(https, schemas.reqBody.firmware)) return null
 
   const {
-    bugFixed,
+    bugFixed = '',
     category,
     custom,
-    feature,
+    feature = '',
     firmwareLayer,
     md5,
-    modelTxt,
+    modelTxt = '',
     status,
     testReportUrl = '',
     url,
@@ -276,6 +269,8 @@ exports.getProductModel = functions.https.onRequest(async (req, res) => {
     req,
     res
   }
+
+  if (!validatePermission(https)) return null
   if (!validateReq(https)) return null
   if (!validateBodyProps(https, schemas.reqBody.getProductModel)) return null
 
