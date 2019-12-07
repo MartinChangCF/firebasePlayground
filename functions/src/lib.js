@@ -47,8 +47,8 @@ const categories = [
 
 const statusOpts = [
   'release',
-  'beta',
-  'alpha',
+  // 'beta',
+  // 'alpha',
   'develop'
 ]
 
@@ -76,18 +76,14 @@ export const schemas = {
   },
   reqBody: {
     mib: new Schema({
-      intrising: { // the magic word for external info from out of company IP
-        type: String,
-        enum: ['53116727']
-      },
-      version: {
-        type: String,
-        required: true
-      },
       custom: {
         type: String,
         required: true,
         enum: customs.network
+      },
+      feature: {
+        type: String,
+        required: false
       },
       models: {
         type: Array,
@@ -117,16 +113,12 @@ export const schemas = {
         required: true,
         enum: statusOpts
       },
-      feature: {
+      version: {
         type: String,
-        required: false
+        required: true
       }
     }),
     firmware: new Schema({
-      intrising: { // the magic word for external info from out of company IP
-        type: String,
-        enum: ['53116727']
-      },
       /*
         Removed:
         - domain (for controller, may replaced by 'custom'?)
@@ -181,10 +173,6 @@ export const schemas = {
       }
     }),
     getProductModel: new Schema({
-      intrising: { // the magic word for external info from out of company IP
-        type: String,
-        enum: ['53116727']
-      },
       category: {
         type: Array,
         required: true,
