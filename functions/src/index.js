@@ -32,8 +32,9 @@ function validateReq ({ req, res }) {
 function validatePermission ({ req, res }) {
   const ip = req.get('X-Forwarded-For') || req.connection.remoteAddress || 'anonymous'
   const ipOk = ip === intrisingIp
-  const authOk = req.get('Authorization') === 'Basic aW50cmlzaW5nOjUzMTE2NzI3' // intrising:53116727 in base64
-  const fcfLog = `Request permission check: ${ipOk || authOk ? 'passed' : 'failed'} (IP is ${ipOk ? 'correct' : ip} and basic auth ${authOk ? 'correct' : 'incorrect'})`
+  const auth = req.get('Authorization')
+  const authOk = auth === 'Basic aW50cmlzaW5nOjUzMTE2NzI3' // intrising:53116727 in base64
+  const fcfLog = `Request permission check: ${ipOk || authOk ? 'passed' : 'failed'} (IP is ${ipOk ? 'correct' : ip} and basic auth ${auth} is {authOk ? 'correct' : 'incorrect'})`
   console.log(fcfLog)
   if (ipOk || authOk) {
     return true
