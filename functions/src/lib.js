@@ -55,7 +55,7 @@ const statusOpts = [
 const newRules = {
   url: {
     use: {
-      useUrlCheck: (val) => /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(val) || val == null
+      useUrlCheck: (val) => /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/.test(val) || val == null || val === ''
     },
     message: {
       useUrlCheck: (path) => `${path} must be a valid URL.`
@@ -140,9 +140,8 @@ export const schemas = {
       feature: {
         type: String
       },
-      firmwareLayer: {
+      firmwareLayer: {  // only required on category is in ['router', 'routerx']
         type: Number,
-        required: true,
         enum: [2, 3]
       },
       md5: {

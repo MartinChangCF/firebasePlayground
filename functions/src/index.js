@@ -34,7 +34,7 @@ function validatePermission ({ req, res }) {
   const ipOk = ip === intrisingIp
   const auth = req.get('Authorization')
   const authOk = auth === 'Basic aW50cmlzaW5nOjUzMTE2NzI3' // intrising:53116727 in base64
-  const fcfLog = `Request permission check: ${ipOk || authOk ? 'passed' : 'failed'} (IP is ${ipOk ? 'correct' : ip} and basic auth ${auth} is {authOk ? 'correct' : 'incorrect'})`
+  const fcfLog = `Request permission check: ${ipOk || authOk ? 'passed' : 'failed'} (IP is ${ipOk ? 'correct' : ip} and basic auth ${auth} is ${authOk ? 'correct' : 'incorrect'})`
   console.log(fcfLog)
   if (ipOk || authOk) {
     return true
@@ -213,7 +213,7 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
     category,
     custom,
     feature = '',
-    firmwareLayer,
+    firmwareLayer = 2,  // not required, but if properly provided in request then must be in [2, 3].
     md5,
     modelTxt = '',
     status,
@@ -251,7 +251,7 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
         category,
         custom,
         feature,
-        firmwareLayer,
+        firmwareLayer: ['router', 'routerx'].includes(category) ? firmwareLayer : null, // only these two categories require fwLayer
         md5,
         modelTxt,
         status,
