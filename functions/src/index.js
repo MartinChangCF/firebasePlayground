@@ -108,8 +108,8 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
     .catch((error) => errorHandler(https, error))
 
   const mibUrls = transform(models, (result, { l2Url = null, l3Url = null, model }, key) => {
-    result[`${custom}_${formattedVersion}_${model}_l2`] = l2Url
-    result[`${custom}_${formattedVersion}_${model}_l3`] = l3Url
+    result[`${custom}_${formattedVersion}_${model}_l2`] = l2Url === '' ? null : l2Url
+    result[`${custom}_${formattedVersion}_${model}_l3`] = l3Url === '' ? null : l3Url
   }, {})
 
   const invalidModel = {
@@ -124,14 +124,14 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
   }
   const newModels = transform(models, (result, { category, l2Url = null, l3Url = null, model }, index) => {
     /* Skip both null situ and res with warning */
-    if (l2Url == null && l3Url == null) {
+    if ((l2Url == null && l3Url == null) || (l2Url === '' && l3Url === '')) {
       invalidModel.pool.push(`${custom}_${version}_${model}`)
     } else {
       result.push({
         category,
         model,
-        l2: l2Url != null,
-        l3: l3Url != null
+        l2: l2Url != null && l2Url !== '',
+        l3: l3Url != null && l3Url !== ''
       })
     }
   })
