@@ -184,6 +184,26 @@ export const schemas = {
           enum: categories
         }
       }
+    }),
+    getLatestFirmware: new Schema({
+      type: Array,
+      required: true,
+      length: {
+        min: 1,
+        max: 10
+      },
+      each: new Schema({
+        category: {
+          type: String,
+          required: true,
+          enum: categories
+        },
+        vendor: {
+          type: String,
+          required: true,
+          enum: [...customs.network, 'all']
+        }
+      })
     })
   },
   db: {}

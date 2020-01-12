@@ -19,7 +19,7 @@ async function main () {
   console.time('Main process')
 
   // await go20191112()
-  await go20191121()
+  await go20200112()
 
   /*
   When handling firmware, there is a case needs to be aware of.
@@ -80,4 +80,54 @@ export async function go20191121 () {
   console.groupEnd()
   console.timeEnd('2019/11/21')
   close(db)
+}
+
+export async function go20200111() {
+  console.time('2020/01/11')
+  console.group('2020/01/11')
+  
+  const {
+    db
+  } = await init('admin', 'lantechhub')
+  
+  const reqBody = [
+    {"vendor": "lantech_lantech", "category": "wrouter"},
+    {"vendor": "lantech_lantech", "category": "swix2"}
+  ]
+
+  const naturalSorting = (data, key, option = 'asc') => {
+    return option === 'asc' ?
+      data.slice().sort((a, b) => a[key].localeCompare(b[key], undefined, {
+        numeric: true
+      })) :
+      data.slice().sort((a, b) => b[key].localeCompare(a[key], undefined, {
+        numeric: true
+      }))
+  }
+
+  for (let { vendor, category } of reqBody) {
+    console.log(vendor, category)
+    const fws = await db.ref('firmware').orderByChild('custom').equalTo(vendor).once('value').then(sn => sn.val())
+    const result = naturalSorting(_.filter(fws, { category }), 'version', 'desc')
+    console.log(result[0])
+  }
+
+
+  console.groupEnd()
+  console.timeEnd('2020/01/11')
+}
+
+export async function go20200112 () {
+  console.time('2020/01/12')
+  console.group('2020/01/12')
+  
+  const {
+    db
+  } = await init('admin', 'intriot')
+
+  const list = await db.ref('swix-config').orderByChild('macAddress').equalTo('E8:DE:D6:24:00:0B').once('value').then((sn) => sn.val())
+  console.log(list)
+
+  console.groupEnd()
+  console.timeEnd('2020/01/12')
 }

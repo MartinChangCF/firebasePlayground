@@ -297,3 +297,65 @@ exports.getProductModel = functions.https.onRequest(async (req, res) => {
 
   successHandler(https, products)
 })
+
+/*
+  getLatestFirmware:
+  1. get firmware by custom(vendor) then filter by category
+  2. if ip from intrising then use develop, else then use only release
+*/
+exports.getLatestFirmware = functions.https.onRequest((req, res) => {
+  const https = {
+    req,
+    res
+  }
+
+  if (!validatePermission(https)) return null
+  if (!validateReq(https)) return null
+  if (!validateBodyProps(https, schemas.reqBody.getLatestFirmware)) return null
+
+
+  
+
+  /* serilnumber */
+  // const vendors = JSON.parse(req.body.vendors)
+  let conditions = req.body
+  const ref = '/firmware/switch/storage'
+  console.log({ conditions })
+  if (!conditions) {
+    return res.status(400).send('conditions is required.')
+  } else {
+    return admin.database()
+      .ref(ref)
+      .once('value')
+      .then((snapshot) => {
+        if (!snapshot.exists()) {
+          throw String('no fm matched')
+        } else {
+          const swf = snapshot.val()
+          conditions = handledConditions(conditions, swf)
+          const requiredFm = _.transform(conditions, (result, condition, index) => {
+            const { vendor, category } = condition
+            const latest = naturalSorting(
+              _.filter(swf, { custom: vendor, category, status: 'release' }),
+              'version',
+              'desc'
+            )[0]
+            const { version = null, createdAt = null, url = null, md5Checksum, originalFilename } = latest || {}
+            result.push({
+              ...condition,
+              downloadLink: url,
+              latestVersion: version,
+              md5Checksum,
+              originalFilename,
+              createdAt
+            })
+          }, [])
+          res.json(requiredFm)
+        }
+      })
+      .catch(e => {
+        console.log(e)
+        res.status(400).send(e)
+      })
+  }
+})
