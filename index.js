@@ -82,36 +82,35 @@ export async function go20191121 () {
   close(db)
 }
 
-export async function go20200111() {
+export async function go20200111 () {
   console.time('2020/01/11')
   console.group('2020/01/11')
-  
+
   const {
     db
   } = await init('admin', 'lantechhub')
-  
+
   const reqBody = [
-    {"vendor": "lantech_lantech", "category": "wrouter"},
-    {"vendor": "lantech_lantech", "category": "swix2"}
+    { vendor: 'lantech_lantech', category: 'wrouter' },
+    { vendor: 'lantech_lantech', category: 'swix2' }
   ]
 
   const naturalSorting = (data, key, option = 'asc') => {
-    return option === 'asc' ?
-      data.slice().sort((a, b) => a[key].localeCompare(b[key], undefined, {
+    return option === 'asc'
+      ? data.slice().sort((a, b) => a[key].localeCompare(b[key], undefined, {
         numeric: true
-      })) :
-      data.slice().sort((a, b) => b[key].localeCompare(a[key], undefined, {
+      }))
+      : data.slice().sort((a, b) => b[key].localeCompare(a[key], undefined, {
         numeric: true
       }))
   }
 
-  for (let { vendor, category } of reqBody) {
+  for (const { vendor, category } of reqBody) {
     console.log(vendor, category)
     const fws = await db.ref('firmware').orderByChild('custom').equalTo(vendor).once('value').then(sn => sn.val())
     const result = naturalSorting(_.filter(fws, { category }), 'version', 'desc')
     console.log(result[0])
   }
-
 
   console.groupEnd()
   console.timeEnd('2020/01/11')
@@ -120,7 +119,7 @@ export async function go20200111() {
 export async function go20200112 () {
   console.time('2020/01/12')
   console.group('2020/01/12')
-  
+
   const {
     db
   } = await init('admin', 'intriot')

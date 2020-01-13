@@ -213,7 +213,7 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
     category,
     custom,
     feature = '',
-    firmwareLayer = 2,  // not required, but if properly provided in request then must be in [2, 3].
+    firmwareLayer = 2, // not required, but if properly provided in request then must be in [2, 3].
     md5,
     modelTxt = '',
     status,
@@ -312,9 +312,6 @@ exports.getLatestFirmware = functions.https.onRequest((req, res) => {
   if (!validatePermission(https)) return null
   if (!validateReq(https)) return null
   if (!validateBodyProps(https, schemas.reqBody.getLatestFirmware)) return null
-
-
-  
 
   /* serilnumber */
   // const vendors = JSON.parse(req.body.vendors)

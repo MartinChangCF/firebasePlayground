@@ -140,7 +140,7 @@ export const schemas = {
       feature: {
         type: String
       },
-      firmwareLayer: {  // only required on category is in ['router', 'routerx']
+      firmwareLayer: { // only required on category is in ['router', 'routerx']
         type: Number,
         enum: [2, 3]
       },
