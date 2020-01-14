@@ -1,7 +1,15 @@
 import * as functions from 'firebase-functions'
 import admin from 'firebase-admin'
-import { keys, mergeWith, transform } from 'lodash'
-import { schemas } from './lib.js'
+import {
+  chain,
+  filter,
+  head,
+  isEqual,
+  keys,
+  mergeWith,
+  transform
+} from 'lodash'
+import { categories, customs, naturalSorting, schemas } from './lib.js'
 
 admin.initializeApp()
 
@@ -303,7 +311,7 @@ exports.getProductModel = functions.https.onRequest(async (req, res) => {
   1. get firmware by custom(vendor) then filter by category
   2. if ip from intrising then use develop, else then use only release
 */
-exports.getLatestFirmware = functions.https.onRequest((req, res) => {
+exports.getLatestFirmware = functions.https.onRequest(async (req, res) => {
   const https = {
     req,
     res
@@ -313,46 +321,59 @@ exports.getLatestFirmware = functions.https.onRequest((req, res) => {
   if (!validateReq(https)) return null
   if (!validateBodyProps(https, schemas.reqBody.getLatestFirmware)) return null
 
-  /* serilnumber */
-  // const vendors = JSON.parse(req.body.vendors)
-  let conditions = req.body
-  const ref = '/firmware/switch/storage'
-  console.log({ conditions })
-  if (!conditions) {
-    return res.status(400).send('conditions is required.')
-  } else {
-    return admin.database()
-      .ref(ref)
-      .once('value')
-      .then((snapshot) => {
-        if (!snapshot.exists()) {
-          throw String('no fm matched')
-        } else {
-          const swf = snapshot.val()
-          conditions = handledConditions(conditions, swf)
-          const requiredFm = _.transform(conditions, (result, condition, index) => {
-            const { vendor, category } = condition
-            const latest = naturalSorting(
-              _.filter(swf, { custom: vendor, category, status: 'release' }),
-              'version',
-              'desc'
-            )[0]
-            const { version = null, createdAt = null, url = null, md5Checksum, originalFilename } = latest || {}
-            result.push({
-              ...condition,
-              downloadLink: url,
-              latestVersion: version,
-              md5Checksum,
-              originalFilename,
-              createdAt
-            })
-          }, [])
-          res.json(requiredFm)
+  /* Handle 'all' */
+  const conditions = transform(req.body, (result, { category, vendor: custom }, index) => {
+    if (category === 'all' && custom === 'all') {
+      for (const i in categories) {
+        for (const j in customs) {
+          result.push({
+            category: categories[i],
+            custom: customs[j]
+          })
         }
-      })
-      .catch(e => {
-        console.log(e)
-        res.status(400).send(e)
+      }
+    } else if (category !== 'all' && custom === 'all') {
+      for (const i in customs) {
+        result.push({
+          category,
+          custom: customs[i]
+        })
+      }
+    } else if (category === 'all' && custom !== 'all') {
+      for (const i in categories) {
+        result.push({
+          category: categories[i],
+          custom
+        })
+      }
+    } else {
+      result.push({ category, custom })
+    }
+  }, [])
+  const uniqCustoms = chain(conditions).uniqWith(isEqual).groupBy('custom').keys().value()
+  const fwDictionary = {}
+  for (const custom of uniqCustoms) {
+    fwDictionary[custom] = await admin
+      .database()
+      .ref('firmware')
+      .orderByChild('custom')
+      .equalTo(custom)
+      .once('value')
+      .then((sn) => sn.val())
+      .catch((error) => {
+        errorHandler(https, error)
       })
   }
+  const result = transform(conditions, (result, { category, custom }, index) => {
+    const matched = filter(fwDictionary[custom], { category })
+    const { createdAt, url, version } = head(naturalSorting(matched, 'version', 'desc'))
+    result.push({
+      category,
+      vendor: custom,
+      downloadLink: url,
+      latestVersion: version,
+      createdAt
+    })
+  }, [])
+  successHandler(https, result)
 })

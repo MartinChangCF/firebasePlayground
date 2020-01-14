@@ -19,7 +19,7 @@ async function main () {
   console.time('Main process')
 
   // await go20191112()
-  await go20200112()
+  await go20200113()
 
   /*
   When handling firmware, there is a case needs to be aware of.
@@ -129,4 +129,25 @@ export async function go20200112 () {
 
   console.groupEnd()
   console.timeEnd('2020/01/12')
+}
+
+export async function go20200113 () {
+  console.time('2020/01/13')
+  console.group('2020/01/13')
+
+  const {
+    db
+  } = await init('admin', 'lantechhub')
+
+  const nullFw = await db.ref('firmware').once('value').then((sn) => sn.val())
+  const g = _.groupBy(nullFw, 'customCategoryVersion')
+  const tabl = _.transform(g, (result, value, key) => {
+    if (value.length > 1) {
+      result[key] = value.length
+    }
+  }, {})
+  console.log(tabl)
+
+  console.groupEnd()
+  console.timeEnd('2020/01/13')
 }

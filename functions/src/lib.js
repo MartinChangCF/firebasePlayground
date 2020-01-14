@@ -11,7 +11,7 @@ export function naturalSorting (data, key, option = 'asc') {
     }))
 }
 
-const customs = {
+export const customs = {
   network: [ // For network devices
     'intrising',
     /* 'lantech_' is to identify the vendor_custom relationship */
@@ -37,7 +37,7 @@ const customs = {
     'evoip'
   ]
 }
-const categories = [
+export const categories = [
   'swix1',
   'swix2',
   'wrouter',
@@ -188,22 +188,20 @@ export const schemas = {
     getLatestFirmware: new Schema({
       type: Array,
       required: true,
-      length: {
-        min: 1,
-        max: 10
-      },
-      each: new Schema({
-        category: {
-          type: String,
-          required: true,
-          enum: categories
-        },
-        vendor: {
-          type: String,
-          required: true,
-          enum: [...customs.network, 'all']
-        }
-      })
+      each: {
+        type: new Schema({
+          category: {
+            type: String,
+            required: true,
+            enum: [...categories, 'all']
+          },
+          vendor: {
+            type: String,
+            required: true,
+            enum: [...(customs.network), 'all']
+          }
+        })
+      }
     })
   },
   db: {}
