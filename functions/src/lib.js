@@ -186,10 +186,14 @@ export const schemas = {
       }
     }),
     getLatestFirmware: new Schema({
-      type: Array,
-      required: true,
-      each: {
-        type: new Schema({
+      condition: {
+        type: Array,
+        required: true,
+        length: {
+          min: 1,
+          max: 5
+        },
+        each: new Schema({
           category: {
             type: String,
             required: true,

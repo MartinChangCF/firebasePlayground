@@ -319,10 +319,24 @@ exports.getLatestFirmware = functions.https.onRequest(async (req, res) => {
 
   if (!validatePermission(https)) return null
   if (!validateReq(https)) return null
-  if (!validateBodyProps(https, schemas.reqBody.getLatestFirmware)) return null
+  /*
+    Due to the API is using a ARRAY as body, and module "validate" doesn't support this...
+    So, need to reconstruct the body as object for its schema as below...
+  */
+  const condition = req.body
+  const cloneHttps = {
+    req: {
+      ...req,
+      body: {
+        condition
+      },
+    },
+    res
+  }
+  if (!validateBodyProps(cloneHttps, schemas.reqBody.getLatestFirmware)) return null
 
   /* Handle 'all' */
-  const conditions = transform(req.body, (result, { category, vendor: custom }, index) => {
+  const conditions = transform(condition, (result, { category, vendor: custom }, index) => {
     if (category === 'all' && custom === 'all') {
       for (const i in categories) {
         for (const j in customs) {
