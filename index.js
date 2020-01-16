@@ -19,7 +19,7 @@ async function main () {
   console.time('Main process')
 
   // await go20191112()
-  await go20200113()
+  await go20200116()
 
   /*
   When handling firmware, there is a case needs to be aware of.
@@ -150,4 +150,71 @@ export async function go20200113 () {
 
   console.groupEnd()
   console.timeEnd('2020/01/13')
+}
+
+export async function go20200116 () {
+  console.time('2020/01/16')
+  console.group('2020/01/16')
+
+  const {
+    db
+  } = await init('admin', 'lantechhub')
+
+  /* add authorization key on "product", "firmware", "mib/entry" */
+  const updateTargets = {}
+  const fw = await db.ref('firmware').orderByChild('customStatus').equalTo(null).once('value').then((sn) => sn.val())
+  for (const k in fw) {
+    const { custom, status } = fw[k]
+    const warningTxt = `Firmware ${k} lost status key.`
+    if (custom == null) {
+      console.log(warningTxt)
+      continue
+    } else if (status == null) {
+      console.log(warningTxt)
+      continue
+    } else {
+      updateTargets[`firmware/${k}/customStatus`] = `${custom}_${status}`
+    }
+  }
+  const mibEntry = await db.ref('mib/entry').orderByChild('customStatus').equalTo(null).once('value').then((sn) => sn.val())
+  for (const k in mibEntry) {
+    const {
+      custom,
+      status
+    } = mibEntry[k]
+    const warningTxt = `MIB Entry ${k} lost status key.`
+    if (custom == null) {
+      console.log(warningTxt)
+      continue
+    } else if (status == null) {
+      console.log(warningTxt)
+      continue
+    } else {
+      updateTargets[`mib/entry/${k}/customStatus`] = `${custom}_${status}`
+    }
+  }
+  const prod = await db.ref('product').orderByChild('customStatus').equalTo(null).once('value').then((sn) => sn.val())
+  for (const k in prod) {
+    const {
+      custom,
+      status
+    } = prod[k]
+    const warningTxt = `Product ${k} lost status key.`
+    if (custom == null) {
+      console.log(warningTxt)
+      continue
+    } else if (status == null) {
+      console.log(warningTxt)
+      continue
+    } else {
+      for (const kk in custom) {
+        updateTargets[`product/${k}/customStatus`] = `${custom}_${status}`
+      }
+    }
+  }
+
+  console.log(updateTargets)
+
+  console.groupEnd()
+  console.timeEnd('2020/01/16')
 }
