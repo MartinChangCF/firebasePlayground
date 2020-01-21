@@ -171,6 +171,109 @@ export const schemas = {
         required: true
       }
     }),
+    importProduct: new Schema({
+      board: {
+        type: String,
+        required: true
+      },
+      category: {
+        type: String,
+        required: true,
+        enum: categories
+      },
+      custom: {
+        type: Array,
+        required: true,
+        each: {
+          type: String,
+          enum: customs.network
+        }
+      },
+      description: {
+        type: String
+      },
+      family: {
+        type: String
+      },
+      model: {
+        type: String,
+        required: true
+      },
+      mmsCid: {
+        type: String
+      },
+      status: {
+        type: String,
+        required: true,
+        enum: statusOpts
+      },
+      hardware: {
+        hwVersion: {
+          required: true,
+          ma: {
+            type: String
+          },
+          up: {
+            type: String
+          },
+          pw: {
+            type: String
+          },
+          io: {
+            type: String
+          }
+        },
+        hwInfo: {
+          required: true,
+          boardName: {
+            type: String,
+            required: true
+          },
+          cpu: {
+            type: String,
+            required: true
+          },
+          tClock: {
+            type: String,
+            required: true
+          },
+          ram: {
+            type: String,
+            required: true
+          },
+          flash: {
+            type: String,
+            required: true
+          },
+          mac: {
+            type: String,
+            required: true
+          },
+          smi: {
+            type: Array,
+            required: true,
+            each: {
+              type: String
+            }
+          },
+          i2c: {
+            type: Array,
+            required: true,
+            each: {
+              type: String
+            }
+          },
+          hwMonitor: {
+            type: String,
+            required: true
+          },
+          poe: {
+            type: Boolean,
+            required: true
+          }
+        }
+      }
+    }),
     getProductModel: new Schema({
       category: {
         type: Array,

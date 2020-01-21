@@ -19,7 +19,9 @@ const dbTime = admin.database.ServerValue.TIMESTAMP
 const dbRef = {
   mibEntry: db.ref('mib/entry'),
   mibDownload: db.ref('mib/download'),
-  fw: db.ref('firmware')
+  fw: db.ref('firmware'),
+  prod: db.ref('product'),
+  prodHw: db.ref('productHardware')
 }
 
 function validateReq ({ req, res }) {
@@ -273,6 +275,68 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
   }
 })
 
+/*  */
+exports.importProduct = functions.https.onRequest(async (req, res) => {
+  const message = []
+  const https = {
+    req,
+    res
+  }
+
+  if (!validatePermission(https)) return null
+  if (!validateReq(https)) return null
+  if (!validateBodyProps(https, schemas.reqBody.importProduct)) return null
+
+  const {
+    board,
+    category,
+    custom,
+    description,
+    model,
+    mmsCid,
+    status,
+    hardware: {
+      hwVersion: {
+        ma = '',
+        up = '',
+        pw = '',
+        io = ''
+      },
+      hwInfo
+    }
+  } = req.body
+
+  const prodRef = dbRef.prod.child(model)
+  const isModelDuplicated = await prodRef.once('value').then(sn => sn.exists()).catch((error) => errorHandler(https, error))
+  /* Duplicated or not, set it anyway */
+  await prodRef
+    .set({
+      board,
+      category,
+      custom,
+      description,
+      mmsCid,
+      status
+    })
+    .catch((error) => errorHandler(https, error))
+  message.push(`${model} is ${!isModelDuplicated ? 'created' : 'updated'}.`)
+
+  const hwVers = [ma, up, pw, io].map(x => x.replace(/\./g, '!')).join('_') // fdb doesn't accept . in key or value
+  const hwRef = dbRef.prodHw.child(model).child(hwVers)
+  const ishwVersDuplicated = await hwRef.once('value').then(sn => sn.exists()).catch((error) => errorHandler(https, error))
+  /* Duplicated or not, set it anyway */
+  await hwRef
+    .set({
+      ...hwInfo
+    })
+    .catch((error) => errorHandler(https, error))
+  message.push(`hw version is ${!ishwVersDuplicated ? 'created' : 'updated'}.`)
+
+  successHandler(https, {
+    message: message.join(', ')
+  })
+})
+
 exports.getProductModel = functions.https.onRequest(async (req, res) => {
   const https = {
     req,
@@ -329,7 +393,7 @@ exports.getLatestFirmware = functions.https.onRequest(async (req, res) => {
       ...req,
       body: {
         condition
-      },
+      }
     },
     res
   }
