@@ -75,7 +75,7 @@ export const schemas = {
     }, {})
   },
   reqBody: {
-    mib: new Schema({
+    importPrivateMib: new Schema({
       custom: {
         type: String,
         required: true,
@@ -118,7 +118,7 @@ export const schemas = {
         required: true
       }
     }),
-    firmware: new Schema({
+    importFirmware: new Schema({
       /*
         Removed:
         - domain (for controller, may replaced by 'custom'?)

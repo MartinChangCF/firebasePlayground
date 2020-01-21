@@ -92,7 +92,7 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
 
   if (!validatePermission(https)) return null
   if (!validateReq(https)) return null
-  if (!validateBodyProps(https, schemas.reqBody.mib)) return null
+  if (!validateBodyProps(https, schemas.reqBody.importPrivateMib)) return null
 
   /* Check if exists */
   const {
@@ -214,7 +214,7 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
 
   if (!validatePermission(https)) return null
   if (!validateReq(https)) return null
-  if (!validateBodyProps(https, schemas.reqBody.firmware)) return null
+  if (!validateBodyProps(https, schemas.reqBody.importFirmware)) return null
 
   const {
     bugFixed = '',

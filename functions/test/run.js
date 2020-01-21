@@ -17,7 +17,7 @@ export function testMibSchema () {
   console.time('MIB schema')
   console.group('MIB schema')
 
-  let errors = schemas.reqBody.mib.validate({
+  const errors = schemas.reqBody.importPrivateMib.validate({
     version: '123',
     custom: 'lantech_lantech',
     models: [{
