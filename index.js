@@ -139,14 +139,23 @@ export async function go20200113 () {
     db
   } = await init('admin', 'lantechhub')
 
-  const nullFw = await db.ref('firmware').once('value').then((sn) => sn.val())
-  const g = _.groupBy(nullFw, 'customCategoryVersion')
-  const tabl = _.transform(g, (result, value, key) => {
-    if (value.length > 1) {
-      result[key] = value.length
-    }
-  }, {})
-  console.log(tabl)
+  const nullFw = await db.ref('firmware').orderByChild('customCategoryVersion').equalTo(null).once('value').then((sn) => sn.val())
+  console.log(nullFw)
+
+  /* find dup version */
+  // const g = _.groupBy(nullFw, 'customCategoryVersion')
+  // const tabl = _.transform(g, (result, value, key) => {
+  //   if (value.length > 1) {
+  //     result[key] = value.length
+  //   }
+  // }, {})
+  // console.log(tabl)
+
+  /* update null fw */
+  // for (const k in nullFw) {
+  //   const { category, custom, version } = nullFw[k]
+  //   await db.ref('firmware').child(k).child('customCategoryVersion').set(`${custom}_${category}_${version}`)
+  // }
 
   console.groupEnd()
   console.timeEnd('2020/01/13')
