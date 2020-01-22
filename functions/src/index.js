@@ -340,6 +340,50 @@ exports.importProduct = functions.https.onRequest(async (req, res) => {
   })
 })
 
+exports.getProductHardware = functions.https.onRequest(async (req, res) => {
+  const https = {
+    req,
+    res
+  }
+
+  if (!validatePermission(https)) return null
+  if (!validateReq(https)) return null
+  if (!validateBodyProps(https, schemas.reqBody.getProductHardware)) return null
+
+  const { category, custom } = req.body
+
+  const result = {
+    versions: [],
+    detail: []
+  }
+  const cateProd = await dbRef.prod.orderByChild('category').equalTo(category).once('value').then(sn => sn.val())
+  const prod = transform(cateProd, (result, value, key) => {
+    if (value[custom] === custom) {
+      result[key] = value
+    }
+  }, {})
+  // console.log(JSON.stringify(cateProd))
+  for (const model in prod) {
+    console.log(model)
+    const hwInfo = await dbRef.prodHw.child(model).once('value').then(sn => sn.val())
+    console.log(JSON.stringify(hwInfo))
+    for (const vk in hwInfo) {
+      const [ma, up, pw, io] = vk.split('_').map(x => x.replace(/!/g, '.'))
+      const info = hwInfo[vk]
+      result.versions.push({
+        model,
+        version: { ma, up, pw, io }
+      })
+      result.detail.push({
+        model,
+        info
+      })
+    }
+  }
+
+  successHandler(https, result)
+})
+
 exports.getProductModel = functions.https.onRequest(async (req, res) => {
   const https = {
     req,

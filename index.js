@@ -19,7 +19,7 @@ async function main () {
   console.time('Main process')
 
   // await go20191112()
-  await go20200116()
+  await go20200113()
 
   /*
   When handling firmware, there is a case needs to be aware of.

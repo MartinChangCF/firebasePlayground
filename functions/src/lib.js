@@ -274,6 +274,16 @@ export const schemas = {
         }
       }
     }),
+    getProductHardware: new Schema({
+      category: {
+        type: String,
+        enum: categories
+      },
+      custom: {
+        type: String,
+        enum: customs.network
+      }
+    }),
     getProductModel: new Schema({
       category: {
         type: Array,
