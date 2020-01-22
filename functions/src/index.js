@@ -6,7 +6,7 @@ import {
   head,
   isEqual,
   keys,
-  mergeWith,
+  // mergeWith,
   transform
 } from 'lodash'
 import { categories, customs, naturalSorting, schemas } from './lib.js'
@@ -118,8 +118,8 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
     .catch((error) => errorHandler(https, error))
 
   const mibUrls = transform(models, (result, { l2Url = null, l3Url = null, model }, key) => {
-    result[`${custom}_${formattedVersion}_${model}_l2`] = l2Url === '' ? null : l2Url
-    result[`${custom}_${formattedVersion}_${model}_l3`] = l3Url === '' ? null : l3Url
+    if (l2Url) result[`${custom}_${formattedVersion}_${model}_l2`] = l2Url
+    if (l3Url) result[`${custom}_${formattedVersion}_${model}_l3`] = l3Url
   }, {})
 
   const invalidModel = {
@@ -158,7 +158,8 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
       })
       .catch((error) => errorHandler(https, error))
 
-    // Renew "dbRef.mibDownload", by creating a group update to handle adding for new and removing for old
+    /* No set null if exists
+      // Renew "dbRef.mibDownload", by creating a group update to handle adding for new and removing for old
     const mergedMibUrls = await dbRef.mibDownload
       .orderByKey()
       .startAt(`${custom}_${formattedVersion}`)
@@ -170,7 +171,8 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
         return mergeWith(oldMibUrlsToNull, mibUrls, (x, y) => x || y)
       })
       .catch((error) => errorHandler(https, error))
-    await dbRef.mibDownload.update(mergedMibUrls).catch((error) => errorHandler(https, error))
+    */
+    await dbRef.mibDownload.update(mibUrls).catch((error) => errorHandler(https, error))
 
     /* Check if there are invalid model entry */
     if (invalidModel.pool.length) {
