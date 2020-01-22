@@ -248,7 +248,8 @@ exports.importFirmware = functions.https.onRequest(async (req, res) => {
       .update({
         updatedAt: dbTime,
         url,
-        md5
+        md5,
+        status
       })
       .catch((error) => errorHandler(https, error, ''))
     successHandler(https, { message: 'updated' })
