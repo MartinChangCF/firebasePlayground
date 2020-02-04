@@ -116,11 +116,12 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
       return keys(snapshot.val())[0]
     })
     .catch((error) => errorHandler(https, error))
-
-  const mibUrls = transform(models, (result, { l2Url = null, l3Url = null, model }, key) => {
-    if (l2Url) result[`${custom}_${formattedVersion}_${model}_l2`] = l2Url
-    if (l3Url) result[`${custom}_${formattedVersion}_${model}_l3`] = l3Url
-  }, {})
+  const mibDownload = await dbRef.mibDownload
+    .orderByKey()
+    .startAt(`${custom}_${formattedVersion}`)
+    .once('value')
+    .then((sn) => sn.val() || {})
+    .catch((error) => errorHandler(https, error))
 
   const invalidModel = {
     pool: [],
@@ -132,21 +133,35 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
       }
     }
   }
-  const newModels = transform(models, (result, { category, l2Url = null, l3Url = null, model }, index) => {
+
+  const mibUrls = {}
+  const newModels = []
+  for (const key in models) {
+    const { category, l2Url = null, l3Url = null, model } = models[key]
+    if (l2Url) mibUrls[`${custom}_${formattedVersion}_${model}_l2`] = l2Url
+    if (l3Url) mibUrls[`${custom}_${formattedVersion}_${model}_l3`] = l3Url
+
     /* Skip both null situ and res with warning */
     if ((l2Url == null && l3Url == null) || (l2Url === '' && l3Url === '')) {
       invalidModel.pool.push(`${custom}_${version}_${model}`)
     } else {
-      result.push({
+      newModels.push({
         category,
         model,
-        l2: l2Url != null && l2Url !== '',
-        l3: l3Url != null && l3Url !== ''
+        l2: (l2Url != null && l2Url !== '') || !!mibDownload[`${custom}_${formattedVersion}_${model}_l2`],
+        l3: (l3Url != null && l3Url !== '') || !!mibDownload[`${custom}_${formattedVersion}_${model}_l3`]
       })
     }
-  })
+  }
+  // Renew "dbRef.mibDownload", by creating a group update to handle adding for new and removing for old
+  const oldMibUrlsToNull = transform(mibDownload, (result, value, key) => {
+    result[key] = value
+  }, {})
+  const mergedMibUrls = mergeWith(oldMibUrlsToNull, mibUrls, (x, y) => (y != null && y !== '') ? y : x)
 
   if (dupMibKey != null) {
+    await dbRef.mibDownload.update(mergedMibUrls).catch((error) => errorHandler(https, error))
+
     await dbRef.mibEntry.child(dupMibKey)
       .update({
         updatedAt: dbTime,
@@ -157,20 +172,6 @@ exports.importPrivateMib = functions.https.onRequest(async (req, res) => {
         feature
       })
       .catch((error) => errorHandler(https, error))
-
-    // Renew "dbRef.mibDownload", by creating a group update to handle adding for new and removing for old
-    const mergedMibUrls = await dbRef.mibDownload
-      .orderByKey()
-      .startAt(`${custom}_${formattedVersion}`)
-      .once('value')
-      .then((sn) => {
-        const oldMibUrlsToNull = transform(sn.val(), (result, value, key) => {
-          result[key] = value
-        }, {})
-        return mergeWith(oldMibUrlsToNull, mibUrls, (x, y) => y || x)
-      })
-      .catch((error) => errorHandler(https, error))
-    await dbRef.mibDownload.update(mergedMibUrls).catch((error) => errorHandler(https, error))
 
     /* Check if there are invalid model entry */
     if (invalidModel.pool.length) {
