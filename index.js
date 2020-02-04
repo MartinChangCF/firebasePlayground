@@ -19,7 +19,7 @@ async function main () {
   console.time('Main process')
 
   // await go20191112()
-  await go20200113()
+  await go20200204()
 
   /*
   When handling firmware, there is a case needs to be aware of.
@@ -226,4 +226,36 @@ export async function go20200116 () {
 
   console.groupEnd()
   console.timeEnd('2020/01/16')
+}
+
+export async function go20200204 () {
+  console.time('20200204')
+  console.group('20200204')
+
+  const {
+    db
+  } = await init('admin', 'lantechhub')
+
+  const mib = await db.ref('mib/entry').once('value').then(sn => sn.val())
+  const url = await db.ref('mib/download').once('value').then(sn => sn.val())
+
+  const none = _.transform(mib, (result, value, key) => {
+    const { customVersion, models } = value
+    const cv = customVersion.replace(/\./g, '!')
+    for (const { l2, l3, model } of models) {
+      if (l2) {
+        result.push(`${cv}_${model}_l2`)
+      }
+      if (l3) {
+        result.push(`${cv}_${model}_l3`)
+      }
+    }
+  }, [])
+
+  for (const n of none) {
+    if (url[n] == null) console.log(n)
+  }
+
+  console.groupEnd()
+  console.timeEnd('20200204')
 }
