@@ -1,5 +1,5 @@
-/* global appRoot */
-import config from '../static/key'
+import path from 'path'
+import config from './private/firebaseAccounts'
 import admin from 'firebase-admin'
 import app from 'firebase/app'
 import 'firebase/database'
@@ -46,16 +46,13 @@ export async function init (type, project) {
       credential,
       databaseURL
     } = config[project].admin
+    const dir = path.join(__dirname, `./private/${credential}`)
     admin.initializeApp({
-      credential: admin.credential.cert(`${appRoot}/static/key/${credential}`),
+      credential: admin.credential.cert(dir),
       databaseURL
     })
     return {
       db: admin.database()
     }
   }
-}
-
-export function logObj (obj) {
-  console.log(JSON.stringify(obj, null, 4))
 }

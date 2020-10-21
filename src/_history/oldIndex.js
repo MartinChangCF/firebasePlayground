@@ -1,8 +1,8 @@
-import * as lantechHub from './lib/lantechHub'
+import * as lantechHub from '../lantechHub'
 import {
   close,
   init
-} from './lib/firebaseRef'
+} from '../firebaseRef'
 import { resolve } from 'path'
 
 // import { close, init } from './lib'
@@ -35,21 +35,6 @@ async function main () {
   console.timeEnd('Main process')
   console.groupEnd()
   process.exit()
-}
-
-export async function upgradeLantechHub () {
-  console.time('2019/11/12')
-  console.group('2019/11/12')
-
-  const {
-    db
-  } = await init('admin', 'lantechhub')
-  await lantechHub.reconstruct(db)
-  await lantechHub.clearPreviousHub(db)
-
-  console.groupEnd()
-  console.timeEnd('2019/11/12')
-  close(db)
 }
 
 export async function go20191112 () {
@@ -217,7 +202,7 @@ export async function go20200116 () {
       continue
     } else {
       for (const kk in custom) {
-        updateTargets[`product/${k}/customStatus`] = `${custom}_${status}`
+        updateTargets[`product/${kk}/customStatus`] = `${custom}_${status}`
       }
     }
   }

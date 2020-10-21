@@ -1,6 +1,12 @@
 import _ from 'lodash'
-import { close, dbTime, init, logObj } from './firebaseRef'
+import { close, dbTime, init } from '../firebaseRef'
+import { logObj } from '../utility'
 import defaultLantechHub from '../static/data/lantechhub-export'
+
+export async function upgradeLantechHub (db) {
+  await reconstruct(db)
+  await clearPreviousHub(db)
+}
 
 // some old stuff before 2019/11/05
 export async function initNewPrivateMib (db) {
