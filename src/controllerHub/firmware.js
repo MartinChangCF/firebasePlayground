@@ -3,6 +3,10 @@ import { init } from '../firebaseRef'
 import { getFileIDFromGoogleDriveURL, logObj } from '../utility'
 import { getFileInfo } from '../googleapis'
 
+const DB_REF = {
+  fw: 'firmware/switch/storage'
+}
+
 export async function updateNoneMd5ChecksumFw () {
   console.time('Update None MD5Checksum Firmware')
   console.group('Update None MD5Checksum Firmware')
@@ -22,7 +26,7 @@ export async function updateNoneMd5ChecksumFw () {
   for (const i in dataArr) {
     const fileID = getFileIDFromGoogleDriveURL(dataArr[i].url)
     const { md5Checksum, originalFilename } = await getFileInfo(fileID).then(info => info.data).catch(err => { throw err })
-    await db.ref('firmware/switch/storage').child(dataArr[i].key)
+    await db.ref(DB_REF.fw).child(dataArr[i].key)
       .update({
         md5Checksum,
         originalFilename
@@ -37,7 +41,7 @@ export async function updateNoneMd5ChecksumFw () {
 
 export async function findFwWithoutMd5Checksum (db) {
   const data = await db
-    .ref('firmware/switch/storage')
+    .ref(DB_REF.fw)
     .orderByChild('md5Checksum')
     .equalTo(null)
     .once('value')
