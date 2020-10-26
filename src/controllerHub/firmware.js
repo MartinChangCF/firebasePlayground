@@ -20,7 +20,7 @@ export async function updateNoneMd5ChecksumFw () {
   for (const k in dataGroupByCategory) {
     console.log(k, dataGroupByCategory[k].length)
   }
-  if (!dataGroupByCategory.length) console.log('N/A')
+  if (!_.size(dataGroupByCategory)) console.log('N/A')
   console.groupEnd()
 
   for (const i in dataArr) {
