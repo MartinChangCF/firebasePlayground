@@ -7,6 +7,31 @@ const DB_REF = {
   fw: 'firmware/switch/storage'
 }
 
+export async function updateTop50Md5ChecksumFw () {
+  console.time('Update Top50 Md5 Checksum Fw')
+  console.group('Update Top50 Md5 Checksum Fw')
+
+  const { db } = await init('admin', 'controllerHub')
+  const data = await db.ref(DB_REF.fw).orderByChild('createdAt').limitToLast(50).once('value').then((sn) => _.transform(sn.val(), (r, v, k) => {
+    if (['swix1', 'swix2'].includes(v.category)) r.push({ ...v, key: k })
+  }, []))
+  console.log(JSON.stringify(data))
+
+  for (const i in data) {
+    const fileID = getFileIDFromGoogleDriveURL(data[i].url)
+    const { md5Checksum, originalFilename } = await getFileInfo(fileID).then(info => info.data).catch(err => { throw err })
+    await db.ref(DB_REF.fw).child(data[i].key)
+      .update({
+        md5Checksum,
+        originalFilename
+      })
+      .catch(err => console.log(data[i], err))
+  }
+
+  console.groupEnd()
+  console.timeEnd('Update Top50 Md5 Checksum Fw')
+}
+
 export async function updateNoneMd5ChecksumFw () {
   console.time('Update None MD5Checksum Firmware')
   console.group('Update None MD5Checksum Firmware')
