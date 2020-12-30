@@ -5,7 +5,7 @@ async function main () {
   console.time('Main process')
 
   try {
-    await controllerHub.fwDataReview()
+    await controllerHub.ctrlerFwModelReview()
   } catch (error) {
     console.log(error)
   }

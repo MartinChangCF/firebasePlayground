@@ -1,6 +1,7 @@
-import { updateNoneMd5ChecksumFw } from './firmware'
+import { updateNoneMd5ChecksumFw } from './switchFirmware'
+import { updateAvMediaToAspeedFw } from './controller'
 
-async function fwDataReview () {
+async function switchFwDataReview () {
   console.group('Review and fix firmware data')
   console.time('Review and fix firmware data')
 
@@ -14,6 +15,21 @@ async function fwDataReview () {
   console.groupEnd()
 }
 
+async function ctrlerFwModelReview () {
+  console.group('Review and fix firmware model av_media to aspees')
+  console.time('Review and fix firmware model av_media to aspees')
+
+  try {
+    await updateAvMediaToAspeedFw()
+  } catch (error) {
+    console.log(error)
+  }
+
+  console.timeEnd('Review and fix firmware model av_media to aspees')
+  console.groupEnd()
+}
+
 export default {
-  fwDataReview
+  switchFwDataReview,
+  ctrlerFwModelReview
 }
