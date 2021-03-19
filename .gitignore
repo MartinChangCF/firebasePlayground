@@ -120,3 +120,4 @@ typings/
 # private data
 src/private/*.json
 src/static/output
+src/msapi/key.json
