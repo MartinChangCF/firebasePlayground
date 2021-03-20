@@ -18,7 +18,7 @@ const testpool = [
   'redundant/stp/bridge-status',
   'redundant/stp/port-status',
   'redundant/loop-protection/status',
-  'redundant/g-8032-erps/status',,
+  'redundant/g-8032-erps/status',
   'security/mac-address-tables/all-mac-addresses',
   'security/ieee-802-1x/status',
   'system/information',
@@ -30,21 +30,21 @@ const testpool = [
 ]
 
 const instance = axios.create({
-  httpsAgent: new https.Agent({  
+  httpsAgent: new https.Agent({
     rejectUnauthorized: false
   })
 })
 
 async function login () {
-  const tk = await instance.post(apref+'login', key).then(r => {
-    const {status, statusText, data} = r
+  const tk = await instance.post(apref + 'login', key).then(r => {
+    const { status, statusText, data } = r
     if (status === 200) {
       return data.token
     } else {
       throw new Error(statusText)
     }
   }).catch(err => {
-    console.count("login failed")
+    console.count('login failed')
     console.error(err)
   })
   return tk
@@ -53,18 +53,19 @@ async function login () {
 async function testall (token) {
   const cfg = {
     headers: {
-      Authorization: "Bearer " + token
+      Authorization: 'Bearer ' + token
     }
   }
   const reqpool = testpool.map(url => {
-    return instance.get(apref+url, cfg)
+    return instance.get(apref + url, cfg)
       .then(r => {
-        const {status} = r
+        const { status, statusText } = r
         if (status !== 200) {
           throw new Error(statusText)
         }
       }).catch(err => {
-        console.count("request failed", url, err)
+        console.count('request failed')
+        console.error(url, err)
       })
   })
   await Promise.all(reqpool)
