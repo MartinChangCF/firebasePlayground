@@ -3,7 +3,7 @@ import axios from 'axios'
 import https from 'https'
 import key from './key.json'
 
-const ip = '192.168.1.1:1025'
+const ip = '192.168.1.2:1025'
 const apref = `https://${ip}/api/v1/`
 const testpool = [
   'discovery/lldp/neighbour-information',
@@ -78,16 +78,33 @@ async function testall (token) {
     })
 }
 
-async function main () {
-  console.group('Main Process')
-  console.time('Main process')
-
+async function testMemory () {
   const count = Infinity
   for (let i = 1; i <= count; i++) {
     const tk = await login()
     testall(tk)
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
+}
+
+async function testNmpLogin () {
+  // const count = Infinity
+  const count = 2000
+  let tk = ""
+  for (let i = 1; i <= count; i++) {
+    const ntk = await login()
+    console.log(ntk === tk)
+    tk = ntk
+    // testall(tk)
+    await new Promise(resolve => setTimeout(resolve, 100))
+  }
+}
+
+async function main () {
+  console.group('Main Process')
+  console.time('Main process')
+
+  await testNmpLogin()
 
   console.timeEnd('Main process')
   console.groupEnd()
