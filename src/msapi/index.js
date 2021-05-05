@@ -3,7 +3,7 @@ import axios from 'axios'
 import https from 'https'
 import key from './key.json'
 
-const ip = '192.168.1.2:1025'
+const ip = '192.168.1.1:1025'
 const apref = `https://${ip}/api/v1/`
 const testpool = [
   'discovery/lldp/neighbour-information',
@@ -87,16 +87,18 @@ async function testMemory () {
   }
 }
 
+// v1.0.1-a1 is will always create new token
+// v1.0.1-a4 (and later) will reuse the same token if requesting from :1025 TCP port.
 async function testNmpLogin () {
   // const count = Infinity
-  const count = 2000
+  const count = 20000
   let tk = ""
   for (let i = 1; i <= count; i++) {
-    const ntk = await login()
-    console.log(ntk === tk)
+    // const ntk = await login()
+    const ntk = login()
     tk = ntk
-    // testall(tk)
-    await new Promise(resolve => setTimeout(resolve, 100))
+    console.count("login")
+    await new Promise(resolve => setTimeout(resolve, 500))
   }
 }
 
