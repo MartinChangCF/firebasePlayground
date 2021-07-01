@@ -2,6 +2,13 @@ import { throws } from 'assert'
 import axios from 'axios'
 import https from 'https'
 import formData from 'form-data'
+
+/* 
+{
+  "account": "...",
+  "password": "..."
+}
+*/
 import key from './key.json'
 
 const ip = '192.168.1.1'
