@@ -1100,3 +1100,74 @@ export async function createFwUniqKey (db) {
   console.groupEnd()
   console.timeEnd('Create unique key for firmware')
 }
+
+export async function updateFsReadOnly (db, filterOpt) {
+  console.time('Update File System Read Only')
+  console.group('Update File System Read Only')
+
+  const dbRef = {
+    mibEntry: db.ref('mib/entry'),
+    mibDownload: db.ref('mib/download'),
+    fw: db.ref('firmware'),
+    prod: db.ref('product'),
+    prodHw: db.ref('productHardware'),
+    prodReg: db.ref('productRegistry'),
+    fs: db.ref('fileSystem'),
+    fsc: db.ref('fileSystemChangelog'),
+    rcReg: db.ref('renewCmdRegistry'),
+    boo: db.ref('bootloader')
+  }
+
+  const {
+    cus = 'lantech_lantech',
+    l = 2,
+    cat = 'router'
+  } = filterOpt
+
+  const allFWIDs = await dbRef.fw.orderByChild('custom').equalTo(cus).once('value')
+    .then(sn => {
+      const data = sn.val()
+      return _.map(data, 'customCategoryVersion')
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+  // const releasedFWIDs = await dbRef.fw.orderByChild('custom').equalTo(cus).once('value')
+  //   .then(sn => {
+  //     const data = sn.val()
+  //     return _.map(_.omitBy(data, (x) => x.status !== 'release'), 'customCategoryVersion')
+  //   })
+  //   .catch((error) => {
+  //     console.error(error)
+  //   })
+
+  const fsPath = `${cat}/${cus}/${l}`.toLowerCase()
+  const fsPool = await dbRef.fs.child(fsPath)
+    .once('value')
+    .then(sn => sn.val())
+    .catch((error) => { console.error(error) })
+  const fsList = _.transform(fsPool, (result, { url, isReadOnly = false }, vers) => {
+    if (!url) console.error(`empty url, ${vers}, ${cat}, ${l}, ${cus}`)
+    const v = vers.replace(/!/g, '.')
+    if (allFWIDs.includes(`${cus}_${cat}_${v}`) && /[vV][0-9]\.02\.[0-9]{1,4}/.test(v)) {
+      result.push({
+        custom: cus,
+        layer: l,
+        category: cat,
+        version: v,
+        url,
+        isReadOnly
+      })
+    }
+  }, [])
+
+  for (const { version } of fsList) {
+    await dbRef.fs.child(`${fsPath}/${version.replace(/\./g, '!')}/isReadOnly`).set(true)
+
+    // // check the updated value
+    // await dbRef.fs.child(`${fsPath}/${version.replace(/\./g, '!')}/isReadOnly`).once('value').then(x => console.log(x.val()))
+  }
+
+  console.groupEnd()
+  console.timeEnd('Update File System Read Only')
+}
