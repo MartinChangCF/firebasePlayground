@@ -1,13 +1,15 @@
 const { transform } = require('lodash')
-const { exec } = require('child_process')
+const util = require('util')
+const exec = util.promisify(require('child_process').exec)
 const fRef = require('../firebaseRef')
+const path = require('path')
 // const fAdmin = require('firebase-admin')
 // const schedule = require('node-schedule')
 
 class LicenseWizard {
   constructor () {
     this.entries = {}
-    this.cmd = './core2-fcl-generator'
+    this.cmd = path.resolve(__dirname, 'core2-fcl-generator')
     this.licenseFlag = {
       0: '-l3l', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3L
       1: '-l3', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3
@@ -34,47 +36,26 @@ class LicenseWizard {
         console.log(snapshot.val())
 
         const licId = snapshot.key
-        const [mac, category, sn] = licId.split('-')
+        const { entry, license } = snapshot.val()
 
-        const licData = snapshot.val()
-        const { entry } = licData
-        const flagList = transform(entry, (result, val, key) => {
-          if (val) result.push(this.licenseFlag[key])
-        }, [])
-        const flagsStr = flagList.join(' ')
-        const script = `${this.cmd} -mac=${mac.replace(':', '')} -serialno=${sn} -platform=${category} ${flagsStr}`
-
-        const { error, stdout, stderr } = await exec(script)
-        if (error) {
-          console.log(`error: ${error.message}`)
+        if (license != null) {
+          console.log('license exists. Skipped.')
+          console.groupEnd()
           return
         }
-        if (stderr) {
-          console.log(`stderr: ${stderr}`)
+
+        const licenseStr = await this.generateLicenseStr(licId, entry)
+        if (licenseStr == '') {
+          console.error('failed to generate licenseStr')
+          console.groupEnd()
           return
         }
-        console.log(`stdout: ${stdout}`)
 
-        // const schedule = licData.schedule
-        // licData.messages.forEach(x => {
-        //   const cb = async () => {
-        //     // ajax2ws(x.params.deviceId, {...x}, {...responser})
-        //     await db.ref('licenseRegistry/lantech_lantech').child(licId).child('status').set('running')
-        //     console.log('TRIGGERED', x.params.deviceId, { ...x }, { ...responser })
-        //     await db.ref('licenseRegistry/lantech_lantech').child(licId).child('status').set('done')
-        //     await db.ref('licenseRegistry/lantech_lantech').child(licId).remove().catch(err => console.error(err))
-        //   }
-
-        //   // has schedule and in the future
-        //   db.ref('licenseRegistry/lantech_lantech').child(licId).child('status').set('ready')
-        //   if (schedule && new Date().getTime() > schedule) {
-        //     const cfg = new Date(x.schedule)
-        //     this.set(licId + x.id, cfg, cb)
-        //   } else {
-        //     cb()
-        //   }
-        // })
-        console.log()
+        await db.ref('licenseRegistry/lantech_lantech').child(licId).child('license').set({
+          generatedAt: fRef.dbTime(),
+          licenseStr
+        })
+        console.log('license is generated')
         console.groupEnd()
       },
       (error) => {
@@ -106,10 +87,30 @@ class LicenseWizard {
     /* ------------------------------ child_changed ----------------------------- */
     db.ref('licenseRegistry/lantech_lantech').on(
       'child_changed',
-      (childSnapshot, prevChildKey) => {
+      async (childSnapshot, prevChildKey) => {
         const consoleLable = `child_changed: ${childSnapshot.key}`
         console.group(consoleLable)
-        console.log(childSnapshot.val())
+
+        const licId = childSnapshot.key
+        const { entry, license } = childSnapshot.val()
+        if (license != null) {
+          console.log('license exists. Skipped.')
+          console.groupEnd()
+          return
+        }
+        const licenseStr = await this.generateLicenseStr(licId, entry)
+        if (licenseStr == '') {
+          console.error('failed to generate licenseStr')
+          console.groupEnd()
+          return
+        }
+
+        await db.ref('licenseRegistry/lantech_lantech').child(licId).child('license').set({
+          generatedAt: fRef.dbTime(),
+          licenseStr
+        })
+        console.log('license is re-generated')
+        console.groupEnd()
 
         // ajax2ws()
 
@@ -119,6 +120,27 @@ class LicenseWizard {
         console.error('child_changed', error)
         this.closeFRDBConn(db)
       })
+  }
+
+  async generateLicenseStr (licId, licEntry) {
+    const [mac, category, sn] = licId.split('-')
+    const flagList = transform(licEntry, (result, val, key) => {
+      if (val) result.push(this.licenseFlag[key])
+    }, [])
+    const flagsStr = flagList.join(' ')
+    const script = `${this.cmd} -mac=${mac.replace(/:/g, '')} -serialno=${sn} -platform=${category} ${flagsStr}`
+    console.log(script)
+
+    const { error, stdout, stderr } = await exec(script)
+    if (error) {
+      console.log(`error: ${error.message}`)
+      return ''
+    }
+    if (stderr) {
+      console.log('stderr', stderr)
+      return ''
+    }
+    return stdout.toString()
   }
 
   closeFRDBConn (db) {
