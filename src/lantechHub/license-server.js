@@ -123,7 +123,7 @@ class LicenseWizard {
   }
 
   async generateLicenseStr (licId, licEntry) {
-    const [mac, category, sn] = licId.split('-')
+    const [mac, category, sn] = licId.split('_')
     const flagList = transform(licEntry, (result, val, key) => {
       if (val) result.push(this.licenseFlag[key])
     }, [])
