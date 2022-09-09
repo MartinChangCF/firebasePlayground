@@ -152,11 +152,20 @@ class LicenseWizard {
 }
 
 async function run () {
-  const {
-    db
-  } = await fRef.init('admin', 'hub')
-  const lw = new LicenseWizard()
-  await lw.startFRDBConn(db)
+  const cmd = path.resolve(__dirname, 'core2-fcl-generator')
+  const script = `${cmd} -mac=286046FFFFF1 -serialno=00000000000000001 -platform=xcat3 -l3l=true -l3=true -ttdp=true -rnat=true -multiECN=true -filePath=${path.resolve(__dirname, 'text.LCNS')}`
+  await exec(script)
+  const { error, stdout, stderr } = await exec(`cat ${path.resolve(__dirname, 'text.LCNS')}`)
+  if (error) {
+    console.log(`error: ${error.message}`)
+  }
+  if (stderr) {
+    console.log('stderr', stderr)
+  }
+  const bt = Buffer.from(stdout.toString(), 'utf8')
+  console.log('hi', stdout.toString(), '\n')
+  console.log('hi', bt.toString('hex'), '\n')
+  console.log('hi', bt.toString('base64'), '\n')
 }
 
 run()
