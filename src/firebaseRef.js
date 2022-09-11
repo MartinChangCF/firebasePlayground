@@ -52,7 +52,8 @@ export async function init (type, project) {
       databaseURL
     })
     return {
-      db: admin.database()
+      db: admin.database(),
+      stobkt: admin.storage().bucket(`gs://${config[project].storageBucket}`)
     }
   }
 }

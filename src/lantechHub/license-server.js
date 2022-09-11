@@ -7,7 +7,7 @@ const path = require('path')
 // const schedule = require('node-schedule')
 
 class LicenseWizard {
-  constructor () {
+  constructor() {
     this.entries = {}
     this.cmd = path.resolve(__dirname, 'core2-fcl-generator')
     this.licenseFlag = {
@@ -24,8 +24,9 @@ class LicenseWizard {
     }
   }
 
-  async startFRDBConn (db) {
+  async startFRDBConn(db, stobkt) {
     if (!db) throw new Error('db is required.')
+    if (!stobkt) throw new Error('stobkt is required.')
 
     /* ------------------------------- child_added ------------------------------ */
     db.ref('licenseRegistry/lantech_lantech').orderByChild('createdAt').limitToLast(10).on(
@@ -122,13 +123,15 @@ class LicenseWizard {
       })
   }
 
-  async generateLicenseStr (licId, licEntry) {
+  async generateLicenseStr(licId, licEntry) {
+    const filename = licId + '.LCNS'
+    const filepath = path.resolve(__dirname, filename)
     const [mac, category, sn] = licId.split('_')
     const flagList = transform(licEntry, (result, val, key) => {
       if (val) result.push(this.licenseFlag[key])
     }, [])
     const flagsStr = flagList.join(' ')
-    const script = `${this.cmd} -mac=${mac.replace(/:/g, '')} -serialno=${sn} -platform=${category} ${flagsStr}`
+    const script = `${this.cmd} -mac=${mac.replace(/:/g, '')} -serialno=${sn} -platform=${category} ${flagsStr} -filePath=${filepath}`
     console.log(script)
 
     const { error, stdout, stderr } = await exec(script)
@@ -140,10 +143,40 @@ class LicenseWizard {
       console.log('stderr', stderr)
       return ''
     }
-    return stdout.toString()
+
+    // check script output
+//    if (!stdout.toString().includes(`fcl.go:50: write : path is  ${filepath}`)) {
+      // there are expected output and have filename in the last line
+      /* 
+        main_generator.go:24: Version :  0.0.13
+        main_generator.go:38: platform = xcat3
+        main_generator.go:39: filePath = 123.LCNS
+        main_generator.go:40: macPtr =  286046FFFFF1
+        main_generator.go:41: serialNoPtr =  00000000000000001
+        main_generator.go:42: l3l = true
+        main_generator.go:43: l3 =  true
+        main_generator.go:44: ttdp =  true
+        main_generator.go:45: ttdpRNAT =  true
+        main_generator.go:46: ttdpMultiECN =  true
+        check_export.go:58: ValidateInputMACAndSN :  286046FFFFF1 00000000000000001
+        generator.go:49: outputResult.Content.IDLists =  [{28:60:46:ff:ff:f1 00000000000000001}]
+        fcl.go:50: write : path is  123.LCNS
+      */
+  //    return ''
+    //}
+
+    // upload to firebase storage
+    await stobkt.upload(filepath)
+      .then(filemeta => console.log(filemeta))
+      .catch(err => console.log(err))
+
+    // rm local file
+    await exec(`rm ${filepath}`)
+
+    return filename
   }
 
-  closeFRDBConn (db) {
+  closeFRDBConn(db) {
     db.off()
 
     console.log('LicenseWizard exits due to db closed.')
@@ -151,12 +184,14 @@ class LicenseWizard {
   }
 }
 
-async function run () {
+async function run() {
   const {
-    db
+    db,
+    stobkt
   } = await fRef.init('admin', 'hub')
   const lw = new LicenseWizard()
-  await lw.startFRDBConn(db)
+  await lw.startFRDBConn(db, stobkt)
+  console.log('licenst server start')
 }
 
 run()
