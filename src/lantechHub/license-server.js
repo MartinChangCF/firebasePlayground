@@ -45,7 +45,8 @@ class LicenseWizard {
           return
         }
 
-        const licenseStr = await this.generateLicenseStr(licId, entry)
+        const licenseStr = await this.generateLicenseStr(licId, entry, stobkt)
+        console.log(licenseStr)
         if (licenseStr == '') {
           console.error('failed to generate licenseStr')
           console.groupEnd()
@@ -99,7 +100,7 @@ class LicenseWizard {
           console.groupEnd()
           return
         }
-        const licenseStr = await this.generateLicenseStr(licId, entry)
+        const licenseStr = await this.generateLicenseStr(licId, entry, stobkt)
         if (licenseStr == '') {
           console.error('failed to generate licenseStr')
           console.groupEnd()
@@ -123,7 +124,8 @@ class LicenseWizard {
       })
   }
 
-  async generateLicenseStr(licId, licEntry) {
+  // console.log(stobkt)
+  async generateLicenseStr(licId, licEntry, stobkt) {
     const filename = licId + '.LCNS'
     const filepath = path.resolve(__dirname, filename)
     const [mac, category, sn] = licId.split('_')
@@ -139,31 +141,33 @@ class LicenseWizard {
       console.log(`error: ${error.message}`)
       return ''
     }
-    if (stderr) {
-      console.log('stderr', stderr)
-      return ''
-    }
+
+    /* Martin: the output is stderr which is strange... */
+    // if (stderr) {
+    //   console.log('stderr', stderr)
+    //   return ''
+    // }
 
     // check script output
-//    if (!stdout.toString().includes(`fcl.go:50: write : path is  ${filepath}`)) {
-      // there are expected output and have filename in the last line
-      /* 
-        main_generator.go:24: Version :  0.0.13
-        main_generator.go:38: platform = xcat3
-        main_generator.go:39: filePath = 123.LCNS
-        main_generator.go:40: macPtr =  286046FFFFF1
-        main_generator.go:41: serialNoPtr =  00000000000000001
-        main_generator.go:42: l3l = true
-        main_generator.go:43: l3 =  true
-        main_generator.go:44: ttdp =  true
-        main_generator.go:45: ttdpRNAT =  true
-        main_generator.go:46: ttdpMultiECN =  true
-        check_export.go:58: ValidateInputMACAndSN :  286046FFFFF1 00000000000000001
-        generator.go:49: outputResult.Content.IDLists =  [{28:60:46:ff:ff:f1 00000000000000001}]
-        fcl.go:50: write : path is  123.LCNS
-      */
-  //    return ''
-    //}
+    // if (!stdout.toString().includes(`fcl.go:50: write : path is  ${filepath}`)) {
+    //   // there are expected output and have filename in the last line
+    //   /* 
+    //     main_generator.go:24: Version :  0.0.13
+    //     main_generator.go:38: platform = xcat3
+    //     main_generator.go:39: filePath = 123.LCNS
+    //     main_generator.go:40: macPtr =  286046FFFFF1
+    //     main_generator.go:41: serialNoPtr =  00000000000000001
+    //     main_generator.go:42: l3l = true
+    //     main_generator.go:43: l3 =  true
+    //     main_generator.go:44: ttdp =  true
+    //     main_generator.go:45: ttdpRNAT =  true
+    //     main_generator.go:46: ttdpMultiECN =  true
+    //     check_export.go:58: ValidateInputMACAndSN :  286046FFFFF1 00000000000000001
+    //     generator.go:49: outputResult.Content.IDLists =  [{28:60:46:ff:ff:f1 00000000000000001}]
+    //     fcl.go:50: write : path is  123.LCNS
+    //   */
+    //   return ''
+    // }
 
     // upload to firebase storage
     await stobkt.upload(filepath)

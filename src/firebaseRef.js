@@ -53,7 +53,7 @@ export async function init (type, project) {
     })
     return {
       db: admin.database(),
-      stobkt: admin.storage().bucket(`gs://${config[project].storageBucket}`)
+      stobkt: admin.storage().bucket(`gs://${config[project].admin.storageBucket}`)
     }
   }
 }
