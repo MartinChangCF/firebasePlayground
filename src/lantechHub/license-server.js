@@ -134,7 +134,7 @@ class LicenseWizard {
     const filename = [
       mac.replace(/:/g, ''),
       sn,
-      this.categoryMap[x.category] || '',
+      this.categoryMap[category] || '',
       (licEntry || []).map((y, i) => this.licenseFlag[i] || '').join('_')
     ].filter(x => x !== '').join('_') + '.LCNS'
     const filepath = path.resolve(__dirname, filename)
