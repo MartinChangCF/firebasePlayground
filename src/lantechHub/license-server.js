@@ -11,16 +11,20 @@ class LicenseWizard {
     this.entries = {}
     this.cmd = path.resolve(__dirname, 'core2-fcl-generator')
     this.licenseFlag = {
-      0: '-l3l=true', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3L
-      1: '-l3=true', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3
-      2: '-ttdp=true', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP
-      3: '-rnat=true', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
-      4: '-multiECN=true' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
+      0: '-l3l', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3L
+      1: '-l3', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3
+      2: '-ttdp', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP
+      3: '-rnat', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
+      4: '-multiECN' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
       // 5: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
       // 6: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
       // 7: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
       // 8: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
       // 9: Boolean // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
+    }
+    this.categoryMap = {
+      router: 'OS3',
+      routerx: 'OS4'
     }
   }
 
@@ -126,13 +130,18 @@ class LicenseWizard {
 
   // console.log(stobkt)
   async generateLicenseStr(licId, licEntry, stobkt) {
-    const filename = licId + '.LCNS'
-    const filepath = path.resolve(__dirname, filename)
     const [mac, category, sn] = licId.split('_')
+    const filename = [
+      mac.replace(/:/g, ''),
+      sn,
+      this.categoryMap[x.category] || '',
+      (licEntry || []).map((y, i) => this.licenseFlag[i] || '').join('_')
+    ].filter(x => x !== '').join('_') + '.LCNS'
+    const filepath = path.resolve(__dirname, filename)
     const flagList = transform(licEntry, (result, val, key) => {
       if (val) result.push(this.licenseFlag[key])
     }, [])
-    const flagsStr = flagList.join(' ')
+    const flagsStr = flagList.join('=true ')
     const script = `${this.cmd} -mac=${mac.replace(/:/g, '')} -serialno=${sn} -platform=${category} ${flagsStr} -filePath=${filepath}`
     console.log(script)
 
