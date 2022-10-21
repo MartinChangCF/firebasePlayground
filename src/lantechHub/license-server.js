@@ -11,11 +11,11 @@ class LicenseWizard {
     this.entries = {}
     this.cmd = path.resolve(__dirname, 'core2-fcl-generator')
     this.licenseFlag = {
-      0: '-l3l', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3L
-      1: '-l3', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3
-      2: '-ttdp', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP
-      3: '-rnat', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
-      4: '-multiECN' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
+      0: '-l3l=true', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3L
+      1: '-l3=true', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3
+      2: '-ttdp=true', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP
+      3: '-rnat=true', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
+      4: '-multiECN=true' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
       // 5: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
       // 6: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
       // 7: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
