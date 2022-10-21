@@ -26,6 +26,18 @@ class LicenseWizard {
       router: 'OS3',
       routerx: 'OS4'
     }
+    this.licenseMap = {
+      0: 'L3L', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3L
+      1: 'L3', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3
+      2: 'TTDP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP
+      3: 'TTDP_RNAT', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
+      4: 'TTDP_MULTI_ECN', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
+      // 5: 'PTP_TC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
+      // 6: 'PTP_BC', // LTLicenseKeyypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
+      // 7: 'PTP_OC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
+      // 8: 'PTP_GPTP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
+      // 9: 'PTP_POWER' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
+    }
   }
 
   async startFRDBConn(db, stobkt) {
@@ -135,7 +147,7 @@ class LicenseWizard {
       mac.replace(/:/g, ''),
       sn,
       this.categoryMap[category] || '',
-      (licEntry || []).map((y, i) => this.licenseFlag[i] || '').join('_')
+      (licEntry || []).map((y, i) => this.licenseMap[i] || '').join('_')
     ].filter(x => x !== '').join('_') + '.LCNS'
     const filepath = path.resolve(__dirname, filename)
     const flagList = transform(licEntry, (result, val, key) => {
