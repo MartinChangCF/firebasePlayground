@@ -145,7 +145,7 @@ class LicenseWizard {
   // console.log(stobkt)
   async generateLicenseStr(licId, licEntry, stobkt) {
     const [mac, category, sn] = licId.split('_')
-    const licStr = transform(licEntry, (result, k, v) => {
+    const licStr = transform(licEntry, (result, v, k) => {
       if (v) {
         result.push(this.licenseMap[k])
       }
