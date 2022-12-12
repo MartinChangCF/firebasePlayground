@@ -145,11 +145,16 @@ class LicenseWizard {
   // console.log(stobkt)
   async generateLicenseStr(licId, licEntry, stobkt) {
     const [mac, category, sn] = licId.split('_')
+    const licStr = transform(licEntry, (result, k, v) => {
+      if (v) {
+        result.push(this.licenseMap[k])
+      }
+    }, []).join('_')
     const filename = [
       mac.replace(/:/g, ''),
       sn,
       this.categoryMap[category] || '',
-      (licEntry || []).map((y, i) => this.licenseMap[i] || '').join('_')
+      licStr
     ].filter(x => x !== '').join('_') + '.LCNS'
     const filepath = path.resolve(__dirname, filename)
     const flagList = transform(licEntry, (result, val, key) => {
