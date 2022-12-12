@@ -15,12 +15,13 @@ class LicenseWizard {
       1: '-l3', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3
       2: '-ttdp', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP
       3: '-rnat', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
-      4: '-multiECN' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
-      // 5: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
-      // 6: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
-      // 7: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
-      // 8: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
-      // 9: Boolean // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
+      4: '-multiECN', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
+      5: '-iec4dash2' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_IEC62443_4_2
+      // 6: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
+      // 7: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
+      // 8: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
+      // 9: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
+      // 10: Boolean // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
     }
     this.categoryMap = {
       router: 'OS3',
@@ -32,11 +33,12 @@ class LicenseWizard {
       2: 'TTDP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP
       3: 'TTDP_RNAT', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
       4: 'TTDP_MULTI_ECN', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
-      // 5: 'PTP_TC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
-      // 6: 'PTP_BC', // LTLicenseKeyypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
-      // 7: 'PTP_OC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
-      // 8: 'PTP_GPTP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
-      // 9: 'PTP_POWER' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
+      5: 'IEC62443_4_2', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_IEC62443_4_2
+      // 6: 'PTP_TC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
+      // 7: 'PTP_BC', // LTLicenseKeyypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
+      // 8: 'PTP_OC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
+      // 9: 'PTP_GPTP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
+      // 10: 'PTP_POWER' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
     }
   }
 
