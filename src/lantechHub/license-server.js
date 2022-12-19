@@ -17,11 +17,12 @@ class LicenseWizard {
       3: '-rnat', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
       4: '-multiECN', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
       5: '-iec4dash2' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_IEC62443_4_2
-      // 6: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
-      // 7: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
-      // 8: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
-      // 9: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
-      // 10: Boolean // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
+      6: '-nat' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_NAT
+      // 7: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
+      // 8: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
+      // 9: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
+      // 10: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
+      // 11: Boolean // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
     }
     this.categoryMap = {
       router: 'OS3',
@@ -34,11 +35,12 @@ class LicenseWizard {
       3: 'TTDP_RNAT', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
       4: 'TTDP_MULTI_ECN', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
       5: 'IEC62443_4_2', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_IEC62443_4_2
-      // 6: 'PTP_TC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
-      // 7: 'PTP_BC', // LTLicenseKeyypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
-      // 8: 'PTP_OC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
-      // 9: 'PTP_GPTP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
-      // 10: 'PTP_POWER' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
+      6: 'NAT', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_NAT
+      // 7: 'PTP_TC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
+      // 8: 'PTP_BC', // LTLicenseKeyypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
+      // 9: 'PTP_OC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
+      // 10: 'PTP_GPTP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
+      // 11: 'PTP_POWER' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
     }
   }
 
@@ -223,7 +225,7 @@ async function run() {
   } = await fRef.init('admin', 'hub')
   const lw = new LicenseWizard()
   await lw.startFRDBConn(db, stobkt)
-  console.log('licenst server start')
+  console.log('license server start')
 }
 
 run()
