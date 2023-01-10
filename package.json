@@ -4,7 +4,7 @@
   "dependencies": {
     "@babel/preset-env": "^7.12.1",
     "firebase": "^7.24.0",
-    "firebase-admin": "^9.2.0",
+    "firebase-admin": "^11.4.1",
     "firebase-functions": "^3.11.0",
     "google-auth-library": "^6.1.2",
     "googleapis": "^61.0.0",
