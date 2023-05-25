@@ -17,12 +17,8 @@ class LicenseWizard {
       3: '-rnat', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_RNAT
       4: '-multiECN', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
       5: '-iec4dash2', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_IEC62443_4_2
-      6: '-nat' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_NAT
-      // 7: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
-      // 8: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
-      // 9: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
-      // 10: Boolean, // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
-      // 11: Boolean // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
+      6: '-nat', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_NAT
+      7: '-ptp', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP
     }
     this.categoryMap = {
       router: 'OS3',
@@ -36,11 +32,7 @@ class LicenseWizard {
       4: 'TTDP_MULTI_ECN', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_TTDP_MULTI_ECN
       5: 'IEC62443_4_2', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_IEC62443_4_2
       6: 'NAT', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_NAT
-      // 7: 'PTP_TC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_TC
-      // 8: 'PTP_BC', // LTLicenseKeyypeOptions_LT_LICENSE_KEY_TYPE_PTP_BC
-      // 9: 'PTP_OC', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_OC
-      // 10: 'PTP_GPTP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_GPTP
-      // 11: 'PTP_POWER' // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP_POWER
+      7: 'PTP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP
     }
   }
 
