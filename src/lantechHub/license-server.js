@@ -19,6 +19,7 @@ class LicenseWizard {
       5: '-iec4dash2', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_IEC62443_4_2
       6: '-nat', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_NAT
       7: '-ptp', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP
+      8: '-macsec', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_MACSEC
     }
     this.categoryMap = {
       router: 'OS3',
@@ -33,6 +34,7 @@ class LicenseWizard {
       5: 'IEC62443_4_2', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_IEC62443_4_2
       6: 'NAT', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_NAT
       7: 'PTP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP
+      8: 'MACsec', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_MACSEC
     }
   }
 
