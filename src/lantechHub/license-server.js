@@ -48,8 +48,8 @@ class LicenseWizard {
     db.ref('licenseRegistry/lantech_lantech').orderByChild('createdAt').limitToLast(10).on(
       'child_added',
       async (snapshot, prevChildKey) => {
-        const consoleLable = `child_added: ${snapshot.key}`
-        console.group(consoleLable)
+        const consoleLabel = `child_added: ${snapshot.key}`
+        console.group(consoleLabel)
         console.log(snapshot.val())
 
         const licId = snapshot.key
@@ -85,10 +85,8 @@ class LicenseWizard {
     db.ref('licenseRegistry/lantech_lantech').on(
       'child_removed',
       async (oldChildSnapshot) => {
-        const consoleLable = `child_removed: ${oldChildSnapshot.key}`
-        console.group(consoleLable)
-        console.log(oldChildSnapshot.val())
-
+        const consoleLabel = `child_removed: ${oldChildSnapshot.key}`
+        console.group(consoleLabel)
         // const licId = oldChildSnapshot.key
         // const licData = oldChildSnapshot.val()
         // // if (licData.status == null || licData.status === 'ready') {
@@ -96,6 +94,17 @@ class LicenseWizard {
         //   this.cancel(licId + x.id)
         // })
         // // }
+        
+        const { license } = oldChildSnapshot.val()
+        const oldFilename = license.licenseStr
+        if (oldFilename) {
+          await stobkt.file(oldFilename).delete()
+            .then(filemeta => console.log(`stobkt delete ${oldFilename} ok`))
+            .catch(err => console.log(`stobkt delete ${oldFilename} err`, err))
+        } else {
+          console.log("oldFilename is empty, no file to remove", oldFilename)
+        }
+        console.groupEnd()
       },
       (error) => {
         console.error('child_removed', error)
@@ -103,41 +112,46 @@ class LicenseWizard {
       })
 
     /* ------------------------------ child_changed ----------------------------- */
-    db.ref('licenseRegistry/lantech_lantech').on(
-      'child_changed',
-      async (childSnapshot, prevChildKey) => {
-        const consoleLable = `child_changed: ${childSnapshot.key}`
-        console.group(consoleLable)
+    /* Seems like not case need to be handled by child_changed */
 
-        const licId = childSnapshot.key
-        const { entry, license } = childSnapshot.val()
-        if (license != null) {
-          console.log('license exists. Skipped.')
-          console.groupEnd()
-          return
-        }
-        const licenseStr = await this.generateLicenseStr(licId, entry, stobkt)
-        if (licenseStr == '') {
-          console.error('failed to generate licenseStr')
-          console.groupEnd()
-          return
-        }
+    // db.ref('licenseRegistry/lantech_lantech').on(
+    //   'child_changed',
+    //   async (childSnapshot, prevChildKey) => {
+    //     const consoleLabel = `child_changed: ${childSnapshot.key}`
+    //     console.group(consoleLabel)
 
-        await db.ref('licenseRegistry/lantech_lantech').child(licId).child('license').set({
-          generatedAt: fRef.dbTime(),
-          licenseStr
-        })
-        console.log('license is re-generated')
-        console.groupEnd()
+    //     const licId = childSnapshot.key
+    //     const { entry, license } = childSnapshot.val()
+    //     //const { prevEntry, prevLicense } = prevChildKey.val()
+    //     //console.log("changed-sec-prev", prevEntry, prevLicense)
+    //     console.log(prevChildKey)
+    //     if (license != null) {
+    //       console.log('license exists. Skipped re-generate.')
+    //       console.groupEnd()
+    //       return
+    //     }
+    //     const licenseStr = await this.generateLicenseStr(licId, entry, stobkt)
+    //     if (licenseStr == '') {
+    //       console.error('failed to re-generate licenseStr')
+    //       console.groupEnd()
+    //       return
+    //     }
 
-        // ajax2ws()
+    //     await db.ref('licenseRegistry/lantech_lantech').child(licId).child('license').set({
+    //       generatedAt: fRef.dbTime(),
+    //       licenseStr
+    //     })
+    //     console.log('license is re-generated')
+    //     console.groupEnd()
 
-        console.groupEnd()
-      },
-      (error) => {
-        console.error('child_changed', error)
-        this.closeFRDBConn(db)
-      })
+    //     // ajax2ws()
+
+    //     console.groupEnd()
+    //   },
+    //   (error) => {
+    //     console.error('child_changed', error)
+    //     this.closeFRDBConn(db)
+    //   })
   }
 
   // console.log(stobkt)
