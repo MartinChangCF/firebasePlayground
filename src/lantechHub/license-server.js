@@ -20,6 +20,7 @@ class LicenseWizard {
       6: '-nat', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_NAT
       7: '-ptp', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP
       8: '-macsec', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_MACSEC
+      9: '-l3v6', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3V6
     }
     this.categoryMap = {
       router: 'OS3',
@@ -35,6 +36,7 @@ class LicenseWizard {
       6: 'NAT', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_NAT
       7: 'PTP', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_PTP
       8: 'MACsec', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_MACSEC
+      9: 'L3V6', // LTLicenseKeyTypeOptions_LT_LICENSE_KEY_TYPE_L3V6
     }
   }
 
@@ -60,18 +62,18 @@ class LicenseWizard {
         }
 
         const licenseStr = await this.generateLicenseStr(licId, entry, stobkt)
-        console.log(licenseStr)
         if (licenseStr == '') {
           console.error('failed to generate licenseStr')
           console.groupEnd()
           return
         }
 
-        await db.ref('licenseRegistry/lantech_lantech').child(licId).child('license').set({
+        const licObj = {
           generatedAt: fRef.dbTime(),
-          licenseStr
-        })
-        console.log('license is generated')
+          licenseStr: licenseStr
+        }
+        await db.ref('licenseRegistry/lantech_lantech').child(licId).child('license').set(licObj)
+        console.log('license is generated', licObj)
         console.groupEnd()
       },
       (error) => {
@@ -158,13 +160,19 @@ class LicenseWizard {
     }, [])
     const flagsStr = flagList.join('=true ')
     const script = `${this.cmd} -mac=${mac.replace(/:/g, '')} -serialno=${sn} -platform=${category} ${flagsStr} -filePath=${filepath}`
-    console.log(script)
 
-    const { error, stdout, stderr } = await exec(script)
-    if (error) {
-      console.log(`error: ${error.message}`)
-      return ''
-    }
+    const execScriptOk = await exec(script).then(std => {
+      console.group(`exec script "${script}" ok`)
+      console.log(std)
+      console.groupEnd()
+      return true
+    }).catch(error => {
+      if (error) {
+        console.log(`exec script error: ${error.message}`)
+      }
+      return false
+    })
+    if (!execScriptOk) return ''
 
     /* Martin: the output is stderr which is strange... */
     // if (stderr) {
@@ -194,12 +202,16 @@ class LicenseWizard {
     // }
 
     // upload to firebase storage
-    await stobkt.upload(filepath)
-      .then(filemeta => console.log(filemeta))
-      .catch(err => console.log(err))
+    await stobkt.upload(filepath, { destination: filename , overwrite: true })
+      .then(filemeta => console.log("stobkt upload ok", filename))
+      .catch(err => console.log("stobkt upload err", err))
 
     // rm local file
-    await exec(`rm ${filepath}`)
+    await exec(`rm ${filepath}`).then(std => {
+	    console.log("exec rm ok", std)
+    }).catch(err => {
+	    console.log("exec rm err", err)
+    })
 
     return filename
   }
